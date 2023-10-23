@@ -4,7 +4,10 @@ const userPassword = "123456";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const clientIp = req.headers['x-forwarded-for'];
+        let clientIp = req.headers['x-forwarded-for'];
+        if (clientIp.includes(","))
+            clientIp = clientIp.split(",")[0]
+
         console.log("clientIp", clientIp)
         const { userID, password } = req.body;
         if (password === userPassword) {
@@ -50,7 +53,6 @@ function getCountByUserId(user_id) {
 }
 
 async function insertBlockedIP(ipAddress, blockedAt) {
-    console.log("ipAddress", ipAddress)
     return new Promise((resolve, reject) => {
         db.run('INSERT INTO blocked_ips (ip_address, blocked_at) VALUES (?, ?)', [ipAddress, blockedAt], (err) => {
             if (err) {
