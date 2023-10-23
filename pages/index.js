@@ -3,6 +3,8 @@ import IpBlockForm from '../components/IpBlockForm';
 import Message from '../components/Message';
 
 export default function Home() {
+  const [password, setPassword] = useState('');
+  const [ip, setIp] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
@@ -56,9 +58,35 @@ export default function Home() {
     }
   };
 
+  const handleLogin = async () => {
+
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userID: "user123", password }),
+    })
+
+    const data = await response.json();
+    setMessage(data.message)
+    setIsError(true);
+  }
+
   return (
     <div>
-      <IpBlockForm onBlockIp={handleBlockIp} onUnblockIp={handleUnblockIp} />
+      {/* <IpBlockForm onBlockIp={handleBlockIp} onUnblockIp={handleUnblockIp} />
+      */}
+      <div>
+        <h1>Login Page</h1>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin}>Login</button>
+      </div>
       <Message message={message} isError={isError} />
     </div>
   );
