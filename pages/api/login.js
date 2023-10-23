@@ -50,6 +50,7 @@ function getCountByUserId(user_id) {
 }
 
 async function insertBlockedIP(ipAddress, blockedAt) {
+    console.log("ipAddress", ipAddress)
     return new Promise((resolve, reject) => {
         db.run('INSERT INTO blocked_ips (ip_address, blocked_at) VALUES (?, ?)', [ipAddress, blockedAt], (err) => {
             if (err) {
