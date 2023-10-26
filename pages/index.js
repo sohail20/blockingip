@@ -1,93 +1,136 @@
-import { useState } from 'react';
-import IpBlockForm from '../components/IpBlockForm';
-import Message from '../components/Message';
+// Home.js
+import React, { useEffect, useState } from "react";
+// 1. import `ChakraProvider` component
+import { ChakraProvider } from "@chakra-ui/react";
+import {
+  Box,
+  Input,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  Button,
+  Text
+} from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import Message from "@/components/Message";
+import Demo from "@/components/Demo";
+import Custom403 from "./403";
 
 export default function Home() {
-  const [password, setPassword] = useState('');
-  const [ip, setIp] = useState('');
-  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBlocked, setIsBlocked] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleBlockIp = async (ipAddress) => {
-    try {
-      // Send a POST request to your /api/blockIp route with the ipAddress
-      const response = await fetch('/api/blockIp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ip_address: ipAddress }),
-      });
-
-      if (response.ok) {
-        setMessage('IP blocked successfully');
-        setIsError(false);
-      } else {
-        const data = await response.json();
-        setMessage(data.error);
-        setIsError(true);
-      }
-    } catch (error) {
-      setMessage('An error occurred while blocking the IP.');
-      setIsError(true);
-    }
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
-  const handleUnblockIp = async (ipAddress) => {
-    try {
-      // Send a POST request to your /api/unblockIp route with the ipAddress
-      const response = await fetch('/api/unblockIp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ip_address: ipAddress }),
-      });
-
-      if (response.ok) {
-        setMessage('IP unblocked successfully');
-        setIsError(false);
-      } else {
-        const data = await response.json();
-        setMessage(data.error);
-        setIsError(true);
+  useEffect(() => {
+    const checkBlockedStatus = async () => {
+      try {
+        const response = await fetch("/api/isBlocked");
+        if (response.ok) {
+          const data = await response.json();
+          setIsBlocked(data.blocked);
+          setIsLoading(false);
+        } else {
+          setIsBlocked(true);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        setIsBlocked(true);
+        setIsLoading(false);
       }
-    } catch (error) {
-      setMessage('An error occurred while unblocking the IP.');
-      setIsError(true);
+    };
+    const user = localStorage.getItem("user");
+    if (user === null || user === "") {
+      const min = 100;
+      const max = 999;
+      const random3DigitNumber =
+        Math.floor(Math.random() * (max - min + 1)) + min;
+      localStorage.setItem("user", "user" + random3DigitNumber);
     }
-  };
+
+    checkBlockedStatus();
+  }, []);
 
   const handleLogin = async () => {
+    const user = localStorage.getItem("user");
+    if (user !== null && user !== "") {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userID: user, password }),
+      });
 
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userID: "user123", password }),
-    })
+      const data = await response.json();
 
-    const data = await response.json();
-    setMessage(data.message)
-    setIsError(true);
-  }
+      setMessage(data.message);
+      if (data.status) {
+        setIsAuthorized(true);
+        setIsError(false);
+      } else {
+        if (data.message.includes("attempt")) setIsError(true);
+        else setIsBlocked(true);
+      }
+    } else {
+      alert("user not found");
+    }
+  };
 
   return (
-    <div>
-      {/* <IpBlockForm onBlockIp={handleBlockIp} onUnblockIp={handleUnblockIp} />
-      */}
-      <div>
-        <h1>Login Page</h1>
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={handleLogin}>Login</button>
-      </div>
-      <Message message={message} isError={isError} />
-    </div>
+    <ChakraProvider>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          {isBlocked ? (
+            <Custom403 />
+          ) : isAuthorized ? (
+            <Demo />
+          ) : (
+            <>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                height="100vh"
+              >
+                <InputGroup width="300px">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                    }}
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      h="1.75rem"
+                      size="sm"
+                      onClick={togglePasswordVisibility}
+                      icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                    />
+                  </InputRightElement>
+                </InputGroup>
+                <Button colorScheme="teal" mt={2} onClick={handleLogin}>
+                  Login
+                </Button>
+                <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
+                  {message}
+                </Text>
+              </Box>
+            </>
+          )}
+        </div>
+      )}
+    </ChakraProvider>
   );
 }

@@ -7,11 +7,9 @@ export default async function handler(req, res) {
         let clientIp = req.headers['x-forwarded-for'];
         if (clientIp.includes(","))
             clientIp = clientIp.split(",")[0]
-
-        console.log("clientIp", clientIp)
         const { userID, password } = req.body;
         if (password === userPassword) {
-            res.status(200).send("Logged in successfully");
+            res.status(200).json({ message: "Logged in successfully", status: true });
         } else {
             try {
                 const response = await attemptHandler(userID, clientIp);
@@ -30,7 +28,6 @@ async function getLoginAttempts(user_id) {
             if (err) {
                 reject(err);
             } else {
-                console.log("row", row)
                 resolve(row);
             }
         });
@@ -41,10 +38,8 @@ function getCountByUserId(user_id) {
     return new Promise((resolve, reject) => {
         db.all(`SELECT count FROM login_attempts WHERE user_id = "${user_id}"`, (err, row) => {
             if (err) {
-                console.log("err", err.message)
                 reject(err);
             } else {
-                console.log("row", row)
                 // If a row with the provided user_id is found, resolve with the count value; otherwise, resolve with 0.
                 resolve(row[0]);
             }
@@ -52,9 +47,9 @@ function getCountByUserId(user_id) {
     });
 }
 
-async function insertBlockedIP(ipAddress, blockedAt) {
+async function insertBlockedIP(ipAddress, userID, blockedAt) {
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO blocked_ips (ip_address, blocked_at) VALUES (?, ?)', [ipAddress, blockedAt], (err) => {
+        db.run('INSERT INTO blocked_ips (ip_address, user_id, blocked_at) VALUES (?, ?, ?)', [ipAddress, userID, blockedAt], (err) => {
             if (err) {
                 reject(err);
             } else {
@@ -84,7 +79,6 @@ async function updateLoginAttempts(user_id, newCount) {
                 console.error('Error updating login_attempts:', err);
                 reject(err);
             } else {
-                console.log('Update successful', data);
                 resolve();
             }
         });
@@ -100,7 +94,7 @@ async function attemptHandler(user_id, ipAddress) {
             countTmp = newCount
             if (newCount >= 3) {
                 const blockedAt = new Date().toISOString();
-                await insertBlockedIP(ipAddress, blockedAt);
+                await insertBlockedIP(ipAddress, user_id, blockedAt);
                 return { message: 'IP blocked' };
             } else {
                 await updateLoginAttempts(user_id, newCount);
@@ -110,12 +104,9 @@ async function attemptHandler(user_id, ipAddress) {
             try {
                 db.run('INSERT INTO login_attempts (count, user_id) VALUES (?, ?)', [1, user_id], (err, row) => {
                     if (err) {
-                        console.log(err);
                     } else {
-                        console.log(",,,", row);
                     }
                 });
-                console.log('Login attempts updated successfully');
             } catch (error) {
                 console.error('Error updating login attempts:', error);
             }
@@ -129,7 +120,7 @@ async function attemptHandler(user_id, ipAddress) {
         //     console.error('Error getting count:', error);
         // }
 
-        return { message: `${3 - countTmp} temp left` };
+        return { message: `${3 - countTmp} attempt left` };
     } catch (error) {
         console.error("Error in attemptHandler:", error);
         return { error: 'Server error' };

@@ -2,12 +2,11 @@ import db from '../../db';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { ip_address } = req.body;
-    console.log("ip_address", ip_address)
+    const { ip_address, user_id } = req.body;
     if (ip_address) {
       const blockedAt = new Date().toISOString();
 
-      db.run('INSERT INTO blocked_ips (ip_address, blocked_at) VALUES (?, ?)', [ip_address, blockedAt], (err) => {
+      db.run('INSERT INTO blocked_ips (ip_address,user_id, blocked_at) VALUES (?, ?)', [ip_address, user_id, blockedAt], (err) => {
         if (err) {
           res.status(500).json({ error: 'Error blocking IP address' });
         } else {
