@@ -22,18 +22,6 @@ export default async function handler(req, res) {
     }
 }
 
-async function getLoginAttempts(user_id) {
-    return new Promise((resolve, reject) => {
-        db.get('SELECT count FROM login_attempts WHERE user_id = ?', [user_id], (err, row) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
-    });
-}
-
 function getCountByUserId(user_id) {
     return new Promise((resolve, reject) => {
         db.all(`SELECT count FROM login_attempts WHERE user_id = "${user_id}"`, (err, row) => {
@@ -61,16 +49,6 @@ async function insertBlockedIP(ipAddress, userID, blockedAt) {
 
 async function updateLoginAttempts(user_id, newCount) {
     return new Promise((resolve, reject) => {
-        // db.run('UPDATE login_attempts SET count = ? WHERE user_id = ?', [newCount, user_id], (err) => {
-        //     if (err) {
-        //         console.error('Error updating login_attempts:', err);
-        //         reject(err);
-        //     } else {
-        //         console.log('Update successful');
-        //         resolve();
-        //     }
-        // });
-
         db.run("UPDATE login_attempts SET count = $value WHERE user_id = $id", {
             $value: newCount,
             $id: user_id,

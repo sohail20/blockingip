@@ -16,10 +16,8 @@ async function getBlockedUserIDs(unblockThreshold) {
 
 async function deleteBlockedIPs(userIDs) {
   return new Promise((resolve, reject) => {
-    // Create an array of question marks for the number of userIDs.
     const placeholders = userIDs.map(() => '?').join(', ');
 
-    // Construct the SQL query dynamically.
     const query = `DELETE FROM blocked_ips WHERE user_id IN (${placeholders})`;
 
     db.run(query, userIDs, (err) => {
@@ -34,12 +32,9 @@ async function deleteBlockedIPs(userIDs) {
 
 
 async function deleteLoginAttempts(userIDs) {
-  // Your deleteLoginAttempts function remains the same as in the previous response.
   return new Promise((resolve, reject) => {
-    // Create an array of question marks for the number of userIDs.
     const placeholders = userIDs.map(() => '?').join(', ');
 
-    // Construct the SQL query dynamically.
     const query = `DELETE FROM login_attempts WHERE user_id IN (${placeholders})`;
 
     db.run(query, userIDs, (err) => {
@@ -56,10 +51,9 @@ async function deleteLoginAttempts(userIDs) {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const unblockThreshold = 1 * 60 * 1000; // 1 minute in milliseconds
+      const unblockThreshold = 30 * 60 * 1000; // 30 minute in milliseconds
 
       const userIDsToUnblock = await getBlockedUserIDs(unblockThreshold);
-      console.log("userIDsToUnblock", userIDsToUnblock)
       await deleteBlockedIPs(userIDsToUnblock);
       await deleteLoginAttempts(userIDsToUnblock);
 

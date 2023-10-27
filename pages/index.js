@@ -14,7 +14,7 @@ import {
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import Message from "@/components/Message";
 import Demo from "@/components/Demo";
-import Custom403 from "./403";
+import Custom403 from "../components/403";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
