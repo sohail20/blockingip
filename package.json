@@ -15,14 +15,12 @@
     "@emotion/styled": "^11.11.0",
     "bcrypt": "^5.1.1",
     "framer-motion": "^10.16.4",
-    "isomorphic-unfetch": "^4.0.2",
     "next": "13.5.6",
     "node-cron": "^3.0.2",
     "node-fetch": "^3.3.2",
     "react": "^18",
     "react-dom": "^18",
     "react-error-boundary": "^4.0.11",
-    "request-ip": "^3.3.0",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {

@@ -1,17 +1,14 @@
 import db from '../../db';
-const requestIp = require('request-ip');
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    let userIp = requestIp.getClientIp(req);
-    // let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log("userIpasdasdsa", userIp)
-    if (userIp.includes(","))
-      userIp = userIp.split(",")[0]
-    db.all('SELECT * FROM blocked_ips WHERE ip_address = ?', [userIp], (err, rows) => {
+  if (req.method === 'POST') {
+    let { clientIp } = req.body
+    console.log("clientIpeeeee", clientIp)
+    db.all('SELECT * FROM blocked_ips WHERE ip_address = ?', [clientIp], (err, rows) => {
       if (err) {
         res.status(500).json({ error: 'Error checking IP address' });
       } else {
+        console.log("rows", rows)
         if (rows.length > 0) {
           res.status(403).json({ blocked: true });
         } else {

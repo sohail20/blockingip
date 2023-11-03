@@ -8,10 +8,10 @@ const plainTextPassword = "123456";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let clientIp = requestIp.getClientIp(req);
-        console.log("clientIpdsaas", clientIp)
-        if (clientIp.includes(","))
+        let { clientIp } = req.body
+        if (clientIp && clientIp.includes(","))
             clientIp = clientIp.split(",")[0]
+        
         const { password } = req.body;
 
         // Generate a hashed password
