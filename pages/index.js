@@ -81,8 +81,7 @@ export default function Home() {
           setIsBlocked(data.blocked);
           setIsLoading(false);
         } else {
-          setIsBlocked(true);
-          setIsLoading(false);
+          router.push('/403', undefined, { shallow: true });
         }
       } catch (error) {
         setIsBlocked(true);
