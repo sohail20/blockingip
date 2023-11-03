@@ -44,7 +44,7 @@ cron.schedule('*/1 * * * *', async () => {
 
   try {
 
-    const response2 = await fetch('http://localhost:3000/api/isBlocked', {
+    const response2 = await fetch('http://3.85.132.69:3000/api/isBlocked', {
       headers: {
         'Content-Type': 'application/json',
       },
