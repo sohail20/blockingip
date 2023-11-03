@@ -1,18 +1,26 @@
-import db from '../../db';
+const bcrypt = require('bcrypt');
 
-const userPassword = "123456";
+import db from '../../db';
+const saltRounds = 10; // You can adjust the number of salt rounds as needed
+const plainTextPassword = "123456";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let clientIp = req.headers['x-forwarded-for'];
+        let clientIp = req.headers['x-real-ip'] || req.connection.remoteAddress;
+        console.log("clientIp", clientIp)
         if (clientIp.includes(","))
             clientIp = clientIp.split(",")[0]
-        const { userID, password } = req.body;
-        if (password === userPassword) {
+        const { password } = req.body;
+
+        // Generate a hashed password
+        const encrypted = await bcrypt.hash(plainTextPassword, saltRounds);
+        const passwordMatch = await bcrypt.compare(password, encrypted);
+
+        if (passwordMatch) {
             res.status(200).json({ message: "Logged in successfully", status: true });
         } else {
             try {
-                const response = await attemptHandler(userID, clientIp);
+                const response = await attemptHandler(clientIp);
                 res.status(response.error ? 500 : 200).send(response);
             } catch (error) {
                 console.error("Error in attemptHandler:", error);
@@ -22,22 +30,21 @@ export default async function handler(req, res) {
     }
 }
 
-function getCountByUserId(user_id) {
+function getCountByUserId(ipAddress) {
     return new Promise((resolve, reject) => {
-        db.all(`SELECT count FROM login_attempts WHERE user_id = "${user_id}"`, (err, row) => {
+        db.all(`SELECT count FROM login_attempts WHERE ip_address = "${ipAddress}"`, (err, row) => {
             if (err) {
                 reject(err);
             } else {
-                // If a row with the provided user_id is found, resolve with the count value; otherwise, resolve with 0.
                 resolve(row[0]);
             }
         });
     });
 }
 
-async function insertBlockedIP(ipAddress, userID, blockedAt) {
+async function insertBlockedIP(ipAddress, blockedAt) {
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO blocked_ips (ip_address, user_id, blocked_at) VALUES (?, ?, ?)', [ipAddress, userID, blockedAt], (err) => {
+        db.run('INSERT INTO blocked_ips (ip_address, ip_address, blocked_at) VALUES (?, ?, ?)', [ipAddress, ipAddress, blockedAt], (err) => {
             if (err) {
                 reject(err);
             } else {
@@ -47,11 +54,11 @@ async function insertBlockedIP(ipAddress, userID, blockedAt) {
     });
 }
 
-async function updateLoginAttempts(user_id, newCount) {
+async function updateLoginAttempts(ipAddress, newCount) {
     return new Promise((resolve, reject) => {
-        db.run("UPDATE login_attempts SET count = $value WHERE user_id = $id", {
+        db.run("UPDATE login_attempts SET count = $value WHERE ip_address = $id", {
             $value: newCount,
-            $id: user_id,
+            $id: ipAddress,
         }, (err, data) => {
             if (err) {
                 console.error('Error updating login_attempts:', err);
@@ -63,24 +70,24 @@ async function updateLoginAttempts(user_id, newCount) {
     });
 }
 
-async function attemptHandler(user_id, ipAddress) {
+async function attemptHandler(ipAddress) {
     try {
         let countTmp = 1
-        const row = await getCountByUserId(user_id);
+        const row = await getCountByUserId(ipAddress);
         if (row && row.count > 0) {
             const newCount = parseInt(row.count + 1);
             countTmp = newCount
             if (newCount >= 3) {
                 const blockedAt = new Date().toISOString();
-                await insertBlockedIP(ipAddress, user_id, blockedAt);
+                await insertBlockedIP(ipAddress, blockedAt);
                 return { message: 'IP blocked' };
             } else {
-                await updateLoginAttempts(user_id, newCount);
+                await updateLoginAttempts(ipAddress, newCount);
             }
         } else {
             // User does not exist, insert a new record. asdas
             try {
-                db.run('INSERT INTO login_attempts (count, user_id) VALUES (?, ?)', [1, user_id], (err, row) => {
+                db.run('INSERT INTO login_attempts (count, ip_address) VALUES (?, ?)', [1, ipAddress], (err, row) => {
                     if (err) {
                     } else {
                     }
@@ -89,14 +96,6 @@ async function attemptHandler(user_id, ipAddress) {
                 console.error('Error updating login attempts:', error);
             }
         }
-        // const user_id = 'user123'; // Replace with the user_id you want to get the count for.
-
-        // try {
-        //     const count = await getCountByUserId(user_id);
-        //     console.log(`Count for user ${user_id}: ${count}`);
-        // } catch (error) {
-        //     console.error('Error getting count:', error);
-        // }
 
         return { message: `${3 - countTmp} attempt left` };
     } catch (error) {
