@@ -1,9 +1,8 @@
 import db from '../../db';
 
 export default async function handler(req, res) {
-  console.log("req.method", req.method)
   if (req.method === 'GET') {
-    let userIp = req.headers['x-real-ip'] || req.connection.remoteAddress;
+    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log("userIp", userIp)
     if (userIp.includes(","))
       userIp = userIp.split(",")[0]

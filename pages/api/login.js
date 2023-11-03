@@ -6,7 +6,7 @@ const plainTextPassword = "123456";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let clientIp = req.headers['x-real-ip'] || req.connection.remoteAddress;
+        let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         console.log("clientIp", clientIp)
         if (clientIp.includes(","))
             clientIp = clientIp.split(",")[0]
