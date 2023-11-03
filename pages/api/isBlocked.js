@@ -1,9 +1,11 @@
 import db from '../../db';
+const requestIp = require('request-ip');
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log("userIp", userIp)
+    let userIp = requestIp.getClientIp(req);
+    // let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log("userIpasdasdsa", userIp)
     if (userIp.includes(","))
       userIp = userIp.split(",")[0]
     db.all('SELECT * FROM blocked_ips WHERE ip_address = ?', [userIp], (err, rows) => {

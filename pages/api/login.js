@@ -1,13 +1,15 @@
 const bcrypt = require('bcrypt');
+const requestIp = require('request-ip');
 
 import db from '../../db';
+
 const saltRounds = 10; // You can adjust the number of salt rounds as needed
 const plainTextPassword = "123456";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        console.log("clientIp", clientIp)
+        let clientIp = requestIp.getClientIp(req);
+        console.log("clientIpdsaas", clientIp)
         if (clientIp.includes(","))
             clientIp = clientIp.split(",")[0]
         const { password } = req.body;
