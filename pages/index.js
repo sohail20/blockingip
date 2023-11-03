@@ -11,9 +11,9 @@ import {
   Text
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/router';
 
 import Demo from "@/components/Demo";
-import Custom403 from "../components/403";
 import { getClientIp } from "@/helper";
 
 
@@ -51,6 +51,8 @@ export async function getStaticProps() {
 }
 
 export default function Home() {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -110,7 +112,7 @@ export default function Home() {
     } else {
       if (data.message.includes("attempt")) setIsError(true);
       else {
-        setIsBlocked(true);
+        router.push('/403', undefined, { shallow: true });
       }
     }
   };
@@ -122,7 +124,7 @@ export default function Home() {
       ) : (
         <div>
           {isBlocked ? (
-            <Custom403 />
+            <p>adsasd</p>
           ) : isAuthorized ? (
             <Demo />
           ) : (
