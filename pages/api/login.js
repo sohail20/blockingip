@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const requestIp = require('request-ip');
 
 import db from '../../db';
 
