@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS blocked_ips (
 );
 `);
 
-cron.schedule('*/1 * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
   if (isCronJobRunning()) {
     return;
   }
