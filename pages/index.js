@@ -18,40 +18,6 @@ import { getClientIp } from "../helper";
 import axiosInstance from "./axiosInstance";
 import Custom403 from "./403";
 
-
-export async function getStaticProps() {
-  try {
-
-    const clientIp = await getClientIp();
-    console.log("clientIpgetStaticProps", clientIp)
-    const response = await fetch('http://localhost:3000/api/isBlocked', {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        clientIp
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        props: { data },
-      };
-    } else {
-      return {
-        props: { error: 'Failed to fetch data from the external API' },
-      };
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    return {
-      props: { error: 'Server error' },
-    };
-  }
-}
-
 export default function Home() {
   const router = useRouter();
 

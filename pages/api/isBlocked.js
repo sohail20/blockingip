@@ -8,6 +8,7 @@ export default async function handler(req, res) {
       if (err) {
         res.status(500).json({ error: 'Error checking IP address' });
       } else {
+        console.log("rows", rows)
         if (rows.length > 0) {
           res.status(403).json({ blocked: true });
         } else {

@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
+require("./cron")
 
 import { db } from '../../db';
-
-const saltRounds = 10; 
+const saltRounds = 10;
 const plainTextPassword = "123456";
 
 export default async function handler(req, res) {
