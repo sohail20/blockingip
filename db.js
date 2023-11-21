@@ -1,21 +1,22 @@
 const sqlite3 = require('sqlite3').verbose();
 const cron = require('node-cron');
-// const fetch = require('node-fetch');
-const fs = require('fs');
-const lockFilePath = './lock-file.lock';
 const db = new sqlite3.Database('./ipblocker.db');
 
+let scheduledTask = null;
 
-function isCronJobRunning() {
-  return fs.existsSync(lockFilePath);
-}
+// Function to start a cron job
+function startCronJob(schedule) {
+  if (scheduledTask) {
+    // Stop the previously scheduled task
+    scheduledTask.stop();
+  }
 
-function createLockFile() {
-  fs.writeFileSync(lockFilePath, '');
-}
+  scheduledTask = cron.schedule(schedule, () => {
+    console.log('Cron job running...');
+    // Your task logic here
+  });
 
-function removeLockFile() {
-  fs.unlinkSync(lockFilePath);
+  console.log(`Cron job scheduled for ${schedule}`);
 }
 
 db.run(`
@@ -26,7 +27,6 @@ db.run(`
     )
 `);
 
-
 db.run(`
 CREATE TABLE IF NOT EXISTS blocked_ips (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,31 +35,33 @@ CREATE TABLE IF NOT EXISTS blocked_ips (
 );
 `);
 
-cron.schedule('*/30 * * * *', async () => {
-  if (isCronJobRunning()) {
-    return;
-  }
+// cron.schedule('*/30 * * * * *', async () => {
+//   try {
 
-  createLockFile();
+//     const response = await fetch('http://localhost:3000/api/unblockIp', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
 
-  try {
+//     if (response.ok) {
+//       const data = await response.json();
+//     } else {
+//       console.error('API request failed');
+//     }
+//   } catch (error) {
+//   }
+// });
 
-    const response = await fetch('http://localhost:3000/api/unblockIp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+// Function to dynamically change cron job timing
+function changeCronTiming(newSchedule) {
+  startCronJob(newSchedule);
+}
 
-    if (response.ok) {
-      const data = await response.json();
-    } else {
-      console.error('API request failed');
-    }
-  } catch (error) {
-  } finally {
-    removeLockFile();
-  }
-});
+// Example: Change the cron job timing dynamically after 30 seconds
+setTimeout(() => {
+  changeCronTiming('*/15 * * * * *'); // Runs every 15 minutes
+}, 30000);
 
-module.exports = db;
+exports.db = db;

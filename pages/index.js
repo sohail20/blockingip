@@ -13,8 +13,9 @@ import {
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
 
-import Demo from "@/components/Demo";
-import { getClientIp } from "@/helper";
+import Demo from "../components/Demo";
+import { getClientIp } from "../helper";
+import axiosInstance from "./axiosInstance";
 
 
 export async function getStaticProps() {
@@ -69,16 +70,19 @@ export default function Home() {
     const checkBlockedStatus = async () => {
       try {
         const clientIp = await getClientIp();
-        const response = await fetch("/api/isBlocked", {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ clientIp })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setIsBlocked(data.blocked);
+        const response = await axiosInstance.post('/isBlocked', { clientIp })
+
+        // const response = await fetch("/api", {
+        //   method: "POST",
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ clientIp })
+        // });
+        console.log("responasse", response)
+        if (response.status === 200) {
+          console.log("data.blocked", response.data.blocked)
+          setIsBlocked(response.data.blocked);
           setIsLoading(false);
         } else {
           router.push('/403', undefined, { shallow: true });
@@ -94,26 +98,30 @@ export default function Home() {
 
   const handleLogin = async () => {
     const clientIp = await getClientIp()
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ clientIp, password }),
-    });
+    const response = await axiosInstance.post('/login', { clientIp, password })
 
-    const data = await response.json();
+    // console.log("response", response)
 
-    setMessage(data.message);
-    if (data.status) {
-      setIsAuthorized(true);
-      setIsError(false);
-    } else {
-      if (data.message.includes("attempt")) setIsError(true);
-      else {
-        router.push('/403', undefined, { shallow: true });
-      }
-    }
+    // const response = await fetch("/api/login", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ clientIp, password }),
+    // });
+
+    // const data = await response.json();
+
+    // setMessage(data.message);
+    // if (data.status) {
+    //   setIsAuthorized(true);
+    //   setIsError(false);
+    // } else {
+    //   if (data.message.includes("attempt")) setIsError(true);
+    //   else {
+    //     router.push('/403', undefined, { shallow: true });
+    //   }
+    // }
   };
 
   return (
