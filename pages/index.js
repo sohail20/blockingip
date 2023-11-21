@@ -16,6 +16,7 @@ import { useRouter } from 'next/router';
 import Demo from "../components/Demo";
 import { getClientIp } from "../helper";
 import axiosInstance from "./axiosInstance";
+import Custom403 from "./403";
 
 
 export async function getStaticProps() {
@@ -71,15 +72,6 @@ export default function Home() {
       try {
         const clientIp = await getClientIp();
         const response = await axiosInstance.post('/isBlocked', { clientIp })
-
-        // const response = await fetch("/api", {
-        //   method: "POST",
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ clientIp })
-        // });
-        console.log("responasse", response)
         if (response.status === 200) {
           console.log("data.blocked", response.data.blocked)
           setIsBlocked(response.data.blocked);
@@ -88,7 +80,9 @@ export default function Home() {
           router.push('/403', undefined, { shallow: true });
         }
       } catch (error) {
-        setIsBlocked(true);
+        if (error && error.response && error.response.data && error.response.data.blocked) {
+          setIsBlocked(error.response.data.blocked);
+        }
         setIsLoading(false);
       }
     };
@@ -100,8 +94,6 @@ export default function Home() {
     const clientIp = await getClientIp()
     const response = await axiosInstance.post('/login', { clientIp, password })
 
-    // console.log("response", response)
-
     // const response = await fetch("/api/login", {
     //   method: "POST",
     //   headers: {
@@ -112,16 +104,16 @@ export default function Home() {
 
     // const data = await response.json();
 
-    // setMessage(data.message);
-    // if (data.status) {
-    //   setIsAuthorized(true);
-    //   setIsError(false);
-    // } else {
-    //   if (data.message.includes("attempt")) setIsError(true);
-    //   else {
-    //     router.push('/403', undefined, { shallow: true });
-    //   }
-    // }
+    setMessage(response.data.message);
+    if (response.data.status) {
+      setIsAuthorized(true);
+      setIsError(false);
+    } else {
+      if (response.data.message.includes("attempt")) setIsError(true);
+      else {
+        router.push('/403', undefined, { shallow: true });
+      }
+    }
   };
 
   return (
@@ -131,7 +123,7 @@ export default function Home() {
       ) : (
         <div>
           {isBlocked ? (
-            <p>adsasd</p>
+            <Custom403 />
           ) : isAuthorized ? (
             <Demo />
           ) : (

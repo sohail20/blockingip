@@ -3,7 +3,7 @@ const { join } = require('path');
 import { createLogger, transports, format } from 'winston';
 require('winston-daily-rotate-file');
 
-const rootPath = process.cwd() + `/logs`;
+const rootPath = process.cwd() + `\\logs`;
 console.log("rootPath", rootPath)
 const errorLog = join(rootPath, 'error-%DATE%.log');
 const requestLog = join(rootPath, 'request-%DATE%.log');
