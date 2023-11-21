@@ -1,31 +1,9 @@
 const bcrypt = require('bcrypt');
-// const Datastore = require('nedb') ;
-// Initialize NeDB and create a new datastore
-// const db2 = new Datastore({
-//     filename: './database.db', // Replace with your desired database file path
-//     autoload: true, // Automatically load the database
-// });
 
 import { db } from '../../db';
-import { db2 } from '../dbHelper';
-// import { findData } from '../../dbHelper';
 
-const saltRounds = 10; // You can adjust the number of salt rounds as needed
+const saltRounds = 10; 
 const plainTextPassword = "123456";
-
-const findData = (query) => {
-    return new Promise((resolve, reject) => {
-        db2.find(query, (err, docs) => {
-            if (err) {
-                console.log("err", err)
-                reject(err);
-            } else {
-                console.log("docsasd", docs)
-                resolve(docs);
-            }
-        });
-    });
-};
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -34,13 +12,7 @@ export default async function handler(req, res) {
             clientIp = clientIp.split(",")[0]
 
         const { password } = req.body;
-        // db2.insert({ ...req.body, method: "POST" }, (err, newDoc) => {
-        //     if (err) {
-        //         console.log(err);
-        //     } else {
-        //         console.log(newDoc);
-        //     }
-        // });
+
         const docs = await findData({ method: "POST" })
         console.log("asdasddocs", docs)
         // Generate a hashed password
@@ -51,8 +23,8 @@ export default async function handler(req, res) {
             res.status(200).json({ message: "Logged in successfully", status: true });
         } else {
             try {
-                // const response = await attemptHandler(clientIp);
-                // res.status(response.error ? 500 : 200).send(response);
+                const response = await attemptHandler(clientIp);
+                res.status(response.error ? 500 : 200).send(response);
             } catch (error) {
                 console.error("Error in attemptHandler:", error);
                 res.status(500).send({ message: 'Server error' });

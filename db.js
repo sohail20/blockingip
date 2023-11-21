@@ -12,8 +12,23 @@ function startCronJob(schedule) {
   }
 
   console.log("schedule", schedule)
-  scheduledTask = cron.schedule(schedule, () => {
-    console.log('Cron job running...');
+  scheduledTask = cron.schedule(schedule, async () => {
+    try {
+
+      const response = await fetch('http://localhost:3000/api/unblockIp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("response", response)
+      if (response.ok) {
+        const data = await response.json();
+      } else {
+        console.error('API request failed');
+      }
+    } catch (error) {
+    }
     // Your task logic here
   });
 
