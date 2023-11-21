@@ -13,8 +13,6 @@ export default async function handler(req, res) {
 
         const { password } = req.body;
 
-        const docs = await findData({ method: "POST" })
-        console.log("asdasddocs", docs)
         // Generate a hashed password
         const encrypted = await bcrypt.hash(plainTextPassword, saltRounds);
         const passwordMatch = await bcrypt.compare(password, encrypted);
