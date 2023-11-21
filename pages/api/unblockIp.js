@@ -17,7 +17,7 @@ async function getBlockedUserIDs(unblockThreshold) {
 async function deleteBlockedIPs(userIDs) {
   return new Promise((resolve, reject) => {
     const placeholders = userIDs.map(() => '?').join(', ');
-
+    console.log("userIDs", userIDs)
     const query = `DELETE FROM blocked_ips WHERE ip_address IN (${placeholders})`;
 
     db.run(query, userIDs, (err) => {
