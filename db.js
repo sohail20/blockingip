@@ -70,8 +70,6 @@ CREATE TABLE IF NOT EXISTS blocked_ips (
 //   }
 // });
 
-startCronJob("*/10 * * * * *");
-
 // Function to dynamically change cron job timing
 function changeCronTiming(newSchedule) {
   startCronJob(newSchedule);
