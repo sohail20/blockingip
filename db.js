@@ -11,6 +11,7 @@ function startCronJob(schedule) {
     scheduledTask.stop();
   }
 
+  console.log("schedule", schedule)
   scheduledTask = cron.schedule(schedule, () => {
     console.log('Cron job running...');
     // Your task logic here
@@ -59,9 +60,5 @@ function changeCronTiming(newSchedule) {
   startCronJob(newSchedule);
 }
 
-// Example: Change the cron job timing dynamically after 30 seconds
-setTimeout(() => {
-  changeCronTiming('*/15 * * * * *'); // Runs every 15 minutes
-}, 30000);
-
 exports.db = db;
+exports.changeCronTiming = changeCronTiming
