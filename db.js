@@ -21,6 +21,7 @@ function startCronJob(schedule) {
           'Content-Type': 'application/json',
         },
       });
+      console.log("response.ok", response.ok)
       if (response.ok) {
         const data = await response.json();
       } else {
