@@ -3,7 +3,7 @@ const { join } = require('path');
 import { createLogger, transports, format } from 'winston';
 require('winston-daily-rotate-file');
 
-const rootPath = process.cwd() + `\\logs`;
+const rootPath = process.cwd() + `/logs`;
 console.log("rootPath", rootPath)
 const errorLog = join(rootPath, 'error-%DATE%.log');
 const requestLog = join(rootPath, 'request-%DATE%.log');
@@ -46,7 +46,7 @@ const logger = createLogger({
             // datePattern: 'YYYY-MM-DD-HH',
             zippedArchive: true,
             maxSize: '100m',
-            format: format.combine(isRequest())
+            // format: format.combine(isRequest())
         }),
     ],
 });
@@ -54,15 +54,16 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         const config = req.body
 
-        logger.info({
-            requestBody: {
-                method: config.method.toUpperCase(),
-                url: config.url,
-                request_body: JSON.stringify(config.data),
-            }
-        });
-
-        logger.error('Received POST request:qweqweqwe');
+        if (config.level === "info")
+            logger.info({
+                requestBody: {
+                    method: config.method.toUpperCase(),
+                    url: config.url,
+                    request_body: JSON.stringify(config.data),
+                }
+            });
+        else if (config.level === "error")
+            logger.error('Received POST request:qweqweqwe');
 
     }
 }

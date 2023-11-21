@@ -8,11 +8,12 @@ const axiosInstance = axios.create({
 });
 
 
-function postError(err){
+function postError(err) {
     fetch("/api/log", {
         body: JSON.stringify({ level: "error", message: err })
     })
 }
+
 axiosInstance.interceptors.request.use(
     async (config) => {
         try {
@@ -21,18 +22,10 @@ axiosInstance.interceptors.request.use(
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(config)
+                body: JSON.stringify({ level: "info", ...config })
             }).then(res => {
                 console.log("res", res)
             })
-            // const newDoc = await insertData({
-            //     method: config.method.toUpperCase(),
-            //     url: config.url,
-            //     request_body: JSON.stringify(config.data),
-            // })
-            // const docs = await findData({ method: "POST" })
-            // console.log("asdasddocsdocsdocsdocsdocs", docs)
-            // return docs;
         } catch (err) {
             postError(err)
             console.error('Error storing request:', err);
@@ -40,7 +33,7 @@ axiosInstance.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.error('Request error', error);
+        postError(error)
         return Promise.reject(error);
     }
 );
@@ -55,7 +48,7 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error) => {
-        console.error('Response error', error);
+        // console.error('Response error', error);
         return Promise.reject(error);
     }
 );

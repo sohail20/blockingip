@@ -21,7 +21,6 @@ function startCronJob(schedule) {
           'Content-Type': 'application/json',
         },
       });
-      console.log("response", response)
       if (response.ok) {
         const data = await response.json();
       } else {
@@ -69,6 +68,8 @@ CREATE TABLE IF NOT EXISTS blocked_ips (
 //   } catch (error) {
 //   }
 // });
+
+startCronJob("*/10 * * * * *");
 
 // Function to dynamically change cron job timing
 function changeCronTiming(newSchedule) {
