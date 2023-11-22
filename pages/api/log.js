@@ -1,10 +1,9 @@
-const { existsSync, mkdirSync } = require('fs');
-const { join } = require('path');
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 import { createLogger, transports, format } from 'winston';
-require('winston-daily-rotate-file');
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 const rootPath = process.cwd() + `/logs`;
-console.log("rootPath", rootPath)
 const errorLog = join(rootPath, 'error-%DATE%.log');
 const requestLog = join(rootPath, 'request-%DATE%.log');
 
@@ -23,7 +22,7 @@ const isRequest = format((info, opts) => {
 function timezoneCalculate() {
     let x = new Date();
     let offset = -x.getTimezoneOffset();
-    return (offset >= 0 ? "+" : "-") + parseInt(offset / 60) + ":" + offset % 60
+    return (offset >= 0 ? "+" : "-") + parseInt(offset / 60) + ":" + offset % 60;
 }
 
 const logger = createLogger({
@@ -35,35 +34,38 @@ const logger = createLogger({
         format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
     ),
     transports: [
-        new transports.DailyRotateFile({
+        new DailyRotateFile({
             filename: errorLog,
             zippedArchive: true,
             maxSize: '100m',
-            level: 'error'
+            level: 'error',
+            maxFiles: '30d'
         }),
-        new transports.DailyRotateFile({
+        new DailyRotateFile({
             filename: requestLog,
-            // datePattern: 'YYYY-MM-DD-HH',
             zippedArchive: true,
             maxSize: '100m',
-            // format: format.combine(isRequest())
+            maxFiles: '30d'
         }),
     ],
 });
-export default async function handler(req, res) {
+
+export default function handler(req, res) {
     if (req.method === 'POST') {
-        const config = req.body
+        const { level, method, url, data } = req.body;
 
-        if (config.level === "info")
-            logger.info({
+        if (level === "info") {
+            logger.info(JSON.stringify({
                 requestBody: {
-                    method: config.method.toUpperCase(),
-                    url: config.url,
-                    request_body: JSON.stringify(config.data),
+                    method: method.toUpperCase(),
+                    url,
+                    request_body: JSON.stringify(data),
                 }
-            });
-        else if (config.level === "error")
-            logger.error('Received POST request:qweqweqwe');
-
+            }));
+        } else if (level === "error") {
+            logger.error('Received POST request');
+        }
+    } else {
+        res.status(405).json({ error: 'Method not allowed' });
     }
 }

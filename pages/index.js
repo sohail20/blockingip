@@ -1,4 +1,3 @@
-// Home.js
 import React, { useEffect, useState } from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import {
@@ -20,7 +19,6 @@ import Custom403 from "./403";
 
 export default function Home() {
   const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -30,57 +28,43 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword(prevState => !prevState);
   };
 
-  useEffect(() => {
-    const checkBlockedStatus = async () => {
-      try {
-        const clientIp = await getClientIp();
-        const response = await axiosInstance.post('/isBlocked', { clientIp })
-        if (response.status === 200) {
-          console.log("data.blocked", response.data.blocked)
-          setIsBlocked(response.data.blocked);
-          setIsLoading(false);
-        } else {
-          router.push('/403', undefined, { shallow: true });
-        }
-      } catch (error) {
-        if (error && error.response && error.response.data && error.response.data.blocked) {
-          setIsBlocked(error.response.data.blocked);
-        }
-        setIsLoading(false);
+  const checkBlockedStatus = async () => {
+    try {
+      const clientIp = await getClientIp();
+      const response = await axiosInstance.post('/isBlocked', { clientIp });
+      setIsBlocked(response.data.blocked);
+    } catch (error) {
+      if (error?.response?.data?.blocked) {
+        setIsBlocked(error.response.data.blocked);
       }
-    };
-
-    checkBlockedStatus();
-  }, []);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
-    const clientIp = await getClientIp()
-    const response = await axiosInstance.post('/login', { clientIp, password })
-
-    // const response = await fetch("/api/login", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ clientIp, password }),
-    // });
-
-    // const data = await response.json();
+    const clientIp = await getClientIp();
+    const response = await axiosInstance.post('/login', { clientIp, password });
 
     setMessage(response.data.message);
     if (response.data.status) {
       setIsAuthorized(true);
       setIsError(false);
     } else {
-      if (response.data.message.includes("attempt")) setIsError(true);
-      else {
+      if (response.data.message.includes("attempt")) {
+        setIsError(true);
+      } else {
         router.push('/403', undefined, { shallow: true });
       }
     }
   };
+
+  useEffect(() => {
+    checkBlockedStatus();
+  }, []);
 
   return (
     <ChakraProvider>
@@ -93,39 +77,35 @@ export default function Home() {
           ) : isAuthorized ? (
             <Demo />
           ) : (
-            <>
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                alignItems="center"
-                height="100vh"
-              >
-                <InputGroup width="300px">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
-                    onChange={(e) => {
-                      setPassword(e.target.value)
-                    }}
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              height="100vh"
+            >
+              <InputGroup width="300px">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <InputRightElement>
+                  <IconButton
+                    h="1.75rem"
+                    size="sm"
+                    onClick={togglePasswordVisibility}
+                    icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
                   />
-                  <InputRightElement>
-                    <IconButton
-                      h="1.75rem"
-                      size="sm"
-                      onClick={togglePasswordVisibility}
-                      icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    />
-                  </InputRightElement>
-                </InputGroup>
-                <Button colorScheme="teal" mt={2} onClick={handleLogin}>
-                  Login
-                </Button>
-                <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
-                  {message}
-                </Text>
-              </Box>
-            </>
+                </InputRightElement>
+              </InputGroup>
+              <Button colorScheme="teal" mt={2} onClick={handleLogin}>
+                Login
+              </Button>
+              <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
+                {message}
+              </Text>
+            </Box>
           )}
         </div>
       )}
