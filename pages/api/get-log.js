@@ -26,7 +26,6 @@ export default async function handler(req, res) {
   try {
     // Read log file
     const logData = fs.readFileSync(logFilePath, 'utf-8');
-    console.log("logData", logData)
     let logs = []
     // Parse and filter logs for the specified date
     if (logData)
@@ -43,6 +42,7 @@ export default async function handler(req, res) {
           }
         })
     //.filter((log) => log && log.timestamp.split('T')[0] === date); // Assuming timestamp key exists in logs
+    console.log("logs", logs)
     console.log("logs.pop()", logs.pop())
     if (logs.length > 0)
       return res.status(200).json(logs);
