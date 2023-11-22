@@ -7,6 +7,8 @@ const rootPath = process.cwd() + `/logs`;
 const errorLog = join(rootPath, 'error-%DATE%.log');
 const requestLog = join(rootPath, 'request-%DATE%.log');
 
+console.log("rootPath", rootPath)
+
 // Create the log directory if it does not exist
 if (!existsSync(rootPath)) {
     mkdirSync(rootPath);
