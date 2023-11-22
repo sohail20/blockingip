@@ -55,7 +55,7 @@ const logger = createLogger({
 export default function handler(req, res) {
     if (req.method === 'POST') {
         const { level, method, url, data } = req.body;
-
+        console.log("level", level)
         if (level === "info") {
             logger.info(JSON.stringify({
                 requestBody: {

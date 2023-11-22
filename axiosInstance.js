@@ -9,16 +9,17 @@ const axiosInstance = axios.create({
 
 function logRequest(config) {
   axios.post('/api/log', { level: 'info', ...config })
-  .then(response => {
-    console.log('Request logged:', response.data);
-  })
-  .catch(error => {
-    console.error('Error logging request:', error);
-  });
+    .then(response => {
+      console.log('Request logged:', response.data);
+    })
+    .catch(error => {
+      console.error('Error logging request:', error);
+    });
 }
 
 axiosInstance.interceptors.request.use(
   async (config) => {
+    console.log("config", config.url)
     logRequest(config);
     return config;
   },
