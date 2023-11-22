@@ -14,7 +14,7 @@ import { useRouter } from 'next/router';
 
 import Demo from "../components/Demo";
 import { getClientIp } from "../helper";
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../axiosInstance";
 import Custom403 from "./403";
 
 export default function Home() {
