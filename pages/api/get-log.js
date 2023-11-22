@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       return res.status(200).json(logs);
     else return res.status(200).json({ message: "No logs found" });
   } catch (error) {
-    console.log("error",)
+    console.log("error", error)
     if (error.message.includes("no such file or directory"))
       return res.status(404).json({ error: 'No logs found' });
     else return res.status(404).json({ "error": "Server error" });
