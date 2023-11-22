@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   const rootPath = process.cwd();
   const logFileName = `${type}-${date}.log`;
-  const logFilePath = path.join(rootPath + "\\logs", logFileName);
+  const logFilePath = path.join(rootPath + "/logs", logFileName);
 
   try {
     // Read log file
