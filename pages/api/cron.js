@@ -1,11 +1,14 @@
 const cron = require('node-cron');
 const { SiteClient } = require('datocms-client');
-const client = new SiteClient('7ff35345302d3d594080cd643c9486');
+const client = new SiteClient('7ff35345302d3d594080cd643c9486', {
+    envoirnment: "development"
+});
 
 let scheduledTask = null;
 
 // Function to start a cron job
 function startCronJob(schedule) {
+    console.log("scheduledTask", scheduledTask)
     if (scheduledTask) {
         // Stop the previously scheduled task
         scheduledTask.stop();
@@ -38,7 +41,10 @@ function startCronJob(schedule) {
 }
 
 // Function to dynamically change cron job timing
-function changeCronTiming(newSchedule) {
+async function changeCronTiming(newSchedule) {
+    const record = await client.items.find("E5yEtaK0QGq4tALAzDdfYw");
+
+    console.log("record", record)
     startCronJob(newSchedule);
 }
 
