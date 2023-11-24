@@ -46,22 +46,22 @@ async function changeCronTiming(newSchedule) {
     startCronJob(newSchedule);
 }
 
-// (async function getRecordById(recordId) {
-//     try {
-//         const record = await client.items.find(recordId);
+(async function getRecordById(recordId) {
+    try {
+        const record = await client.items.find(recordId);
 
-//         if (record) {
-//             console.log('Retrieved record:', record);
-//             changeCronTiming(`*/${record.time} * * * *`)
-//             return record;
-//         } else {
-//             console.log('Record not found');
-//             return null;
-//         }
-//     } catch (error) {
-//         console.error('Error retrieving record:', error);
-//         return null;
-//     }
-// })("NhGzknBMRf-QeO1lgKWtBQ");
+        if (record) {
+            console.log('Retrieved record:', record);
+            changeCronTiming(`*/${record.time} * * * *`)
+            return record;
+        } else {
+            console.log('Record not found');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error retrieving record:', error);
+        return null;
+    }
+})("NhGzknBMRf-QeO1lgKWtBQ");
 
 exports.changeCronTiming = changeCronTiming
