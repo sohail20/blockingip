@@ -64,8 +64,10 @@ export default function handler(req, res) {
                     request_body: JSON.stringify(data),
                 }
             }));
+            res.status(200).send({ message: "success" })
         } else if (level === "error") {
             logger.error('Received POST request');
+            res.status(200).send({ message: "failed" })
         }
     } else {
         res.status(405).json({ error: 'Method not allowed' });
