@@ -1,73 +1,66 @@
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
-import { createLogger, transports, format } from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+import axios from 'axios';
 
-const rootPath = process.cwd() + `/logs`;
-const errorLog = join(rootPath, 'error-%DATE%.log');
-const requestLog = join(rootPath, 'request-%DATE%.log');
+function getCurrentDateTime() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Adding 1 as months are zero-indexed
+    const day = String(today.getDate()).padStart(2, '0');
+    const hour = String(today.getHours()).padStart(2, '0');
+    const minute = String(today.getMinutes()).padStart(2, '0');
+    const second = String(today.getSeconds()).padStart(2, '0');
 
-console.log("rootPath", rootPath)
-
-// Create the log directory if it does not exist
-if (!existsSync(rootPath)) {
-    mkdirSync(rootPath);
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
-const isRequest = format((info, opts) => {
-    if (info.isRequest) {
-        return info;
+async function deleteOldRecords(coreName, duration) {
+    const currentDate = new Date();
+    const fromDate = new Date(currentDate.getTime() - duration * 24 * 60 * 60 * 1000); // Calculate the date from the duration in milliseconds
+    const formattedFromDate = fromDate.toISOString().split('T')[0]; // Format fromDate to 'YYYY-MM-DD' format
+
+    const deleteQuery = `http://52.207.232.135:4141/solr/${coreName}/update?commit=true`;
+    const deleteData = {
+        "delete": {
+            "query": `dateField:[* TO ${formattedFromDate}T00:00:00Z]`
+        }
+    };
+
+    try {
+        const response = await axios.post(deleteQuery, deleteData);
+        console.log(`Deleted records older than ${formattedFromDate}. Solr response:`, response.data);
+    } catch (error) {
+        console.error('Error deleting records:', error);
     }
-    return false;
-});
-
-function timezoneCalculate() {
-    let x = new Date();
-    let offset = -x.getTimezoneOffset();
-    return (offset >= 0 ? "+" : "-") + parseInt(offset / 60) + ":" + offset % 60;
 }
-
-const logger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp({
-            format: `YYYY-MM-DD HH:mm:ss ${timezoneCalculate()}`
-        }),
-        format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
-    ),
-    transports: [
-        new DailyRotateFile({
-            filename: errorLog,
-            zippedArchive: true,
-            maxSize: '100m',
-            level: 'error',
-            maxFiles: '30d'
-        }),
-        new DailyRotateFile({
-            filename: requestLog,
-            zippedArchive: true,
-            maxSize: '100m',
-            maxFiles: '30d'
-        }),
-    ],
-});
 
 export default function handler(req, res) {
     if (req.method === 'POST') {
         const { level, method, url, data } = req.body;
-        console.log("level", level)
+        const currentDateTime = getCurrentDateTime();
+
         if (level === "info") {
-            logger.info(JSON.stringify({
-                requestBody: {
-                    method: method.toUpperCase(),
-                    url,
-                    request_body: JSON.stringify(data),
-                }
-            }));
-            res.status(200).send({ message: "success" })
+            const logData = {
+                level,
+                method: method.toUpperCase(),
+                dateCreated: currentDateTime,
+                url,
+                request_body: JSON.stringify(data),
+            };
+
+            // Send log data to Solr
+            axios.post('http://52.207.232.135:4141/solr/log/update/json/docs', logData)
+                .then(response => {
+                    if(response.data){
+                        axios.get(`http://52.207.232.135:4141/solr/log/update?commit=true`);
+                        res.status(200).send({ message: "success" });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending log data to Solr:', error);
+                    res.status(500).send({ message: "failed" });
+                });
         } else if (level === "error") {
-            logger.error('Received POST request');
-            res.status(200).send({ message: "failed" })
+            // Handle error log here if needed
+            res.status(200).send({ message: "failed" });
         }
     } else {
         res.status(405).json({ error: 'Method not allowed' });
