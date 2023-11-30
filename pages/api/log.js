@@ -1,5 +1,6 @@
 import axios from 'axios';
 import https from "https"
+
 function getCurrentDateTime() {
     const today = new Date();
     const year = today.getFullYear();
@@ -31,6 +32,29 @@ async function deleteOldRecords(coreName, duration) {
             })
         });
         console.log(`Deleted records older than ${formattedFromDate}. Solr response:`, response.data);
+    } catch (error) {
+        console.error('Error deleting records:', error);
+    }
+}
+
+async function deleteRecordsByDate(coreName, dateToDelete) {
+    const deleteQuery = `https://52.200.105.33:8983/solr/${coreName}/update?commit=true`;
+    const deleteData = {
+        delete: {
+            query: `date:"${dateToDelete}T00:00:00Z"`, // Use the specific date to delete records
+        },
+    };
+
+    try {
+        const response = await axios.post(deleteQuery, deleteData, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false,
+            }),
+        });
+        console.log(`Deleted records with date ${dateToDelete}. Solr response:`, response.data);
     } catch (error) {
         console.error('Error deleting records:', error);
     }
