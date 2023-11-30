@@ -1,4 +1,9 @@
 import axios from 'axios';
+import https from "https"
+
+const agent = new https.Agent({
+  rejectUnauthorized: false
+});
 
 function isValidDateFormat(dateString) {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -10,7 +15,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { date, level } = req.query;
+  const { date, level, row } = req.query;
+  console.log("{ date, level, row }", req.method, { date, level, row })
   if (!level) {
     return res.status(400).json({ error: 'Invalid type format. Please use level=info or type=request' });
   }
@@ -19,17 +25,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const solrResponse = await axios.get('http://52.207.232.135:4141/solr/log/select', {
+    const solrResponse = await axios.get('https://52.200.105.33:8983/solr/logs/select', {
       params: {
-          q: `level:${level} AND dateCreated:"${date}*"`, // Query based on level and date
-          rows: 10, // Adjust as per your requirement
-          wt: 'json',
+        q: `level:${level} AND date:"${date}T00:00:00Z"`, // Query based on level and date
+        rows: row || 10, // Adjust as per your requirement
+        wt: 'json',
       },
-  });
+      httpsAgent: agent // Pass the agent here
+    });
 
-  const solrData = solrResponse.data.response.docs; // The retrieved Solr data
+    console.log("solrResponse", solrResponse)
+    const solrData = solrResponse.data.response.docs; // The retrieved Solr data
 
-  res.status(200).json(solrData);
+    if (solrData.length > 0)
+      res.status(200).json(solrData);
+    else
+      res.status(200).json({ message: "No logs found" });
+
   } catch (error) {
     console.log("error", error)
   }

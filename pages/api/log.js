@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import https from "https"
 function getCurrentDateTime() {
     const today = new Date();
     const year = today.getFullYear();
@@ -17,7 +17,7 @@ async function deleteOldRecords(coreName, duration) {
     const fromDate = new Date(currentDate.getTime() - duration * 24 * 60 * 60 * 1000); // Calculate the date from the duration in milliseconds
     const formattedFromDate = fromDate.toISOString().split('T')[0]; // Format fromDate to 'YYYY-MM-DD' format
 
-    const deleteQuery = `http://52.207.232.135:4141/solr/${coreName}/update?commit=true`;
+    const deleteQuery = `https://52.200.105.33:8983/solr/${coreName}/update?commit=true`;
     const deleteData = {
         "delete": {
             "query": `dateField:[* TO ${formattedFromDate}T00:00:00Z]`
@@ -25,7 +25,11 @@ async function deleteOldRecords(coreName, duration) {
     };
 
     try {
-        const response = await axios.post(deleteQuery, deleteData);
+        const response = await axios.post(deleteQuery, deleteData, {
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+            })
+        });
         console.log(`Deleted records older than ${formattedFromDate}. Solr response:`, response.data);
     } catch (error) {
         console.error('Error deleting records:', error);
@@ -36,21 +40,30 @@ export default function handler(req, res) {
     if (req.method === 'POST') {
         const { level, method, url, data } = req.body;
         const currentDateTime = getCurrentDateTime();
-
+        const dayDate = currentDateTime.split(" ")
         if (level === "info") {
             const logData = {
                 level,
                 method: method.toUpperCase(),
                 dateCreated: currentDateTime,
+                date: dayDate[0],
                 url,
                 request_body: JSON.stringify(data),
             };
 
             // Send log data to Solr
-            axios.post('http://52.207.232.135:4141/solr/log/update/json/docs', logData)
+            axios.post('https://52.200.105.33:8983/solr/logs/update/json/docs', logData, {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                })
+            })
                 .then(response => {
-                    if(response.data){
-                        axios.get(`http://52.207.232.135:4141/solr/log/update?commit=true`);
+                    if (response.data) {
+                        axios.get(`https://52.200.105.33:8983/solr/logs/update?commit=true`, {
+                            httpsAgent: new https.Agent({
+                                rejectUnauthorized: false
+                            })
+                        });
                         res.status(200).send({ message: "success" });
                     }
                 })

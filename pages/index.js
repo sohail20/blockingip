@@ -84,6 +84,7 @@ export default function Home() {
               alignItems="center"
               height="100vh"
             >
+              US Moment
               <InputGroup width="300px">
                 <Input
                   type={showPassword ? 'text' : 'password'}

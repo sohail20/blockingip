@@ -46,6 +46,8 @@ async function changeCronTiming(newSchedule) {
     startCronJob(newSchedule);
 }
 
+changeCronTiming(`*/1 * * * *`)
+
 // (async function getRecordById(recordId) {
 //     try {
 //         const record = await client.items.find(recordId);
