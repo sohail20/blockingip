@@ -1,7 +1,7 @@
 const { SiteClient } = require('datocms-client');
 const { changeCronTiming } = require('./pages/api/cron');
 const client = new SiteClient('7ff35345302d3d594080cd643c9486');
-
+console.log("hello their")
 async function getRecordById(recordId) {
     try {
         const record = await client.items.find(recordId);
