@@ -18,7 +18,7 @@ async function createPdf(pageUrl) {
         // Generate PDF
         const pdf = await page.pdf({ format: 'A4' });
         await browser.close();
-        
+
         // // Save PDF to file
         // fs.writeFileSync('output.pdf', pdf);
         console.log('PDF generated successfully!');
@@ -32,23 +32,45 @@ async function createPdf(pageUrl) {
 
 export default async function downloadPdf(req, res) {
     if (req.method === 'POST') {
-        let body = req.body;
-        try {
-            body = JSON.parse(body);
-        } catch (error) {
-            body = body;
-        }
+        // let body = req.body;
+        // try {
+        //     body = JSON.parse(body);
+        // } catch (error) {
+        //     body = body;
+        // }
 
-        let pageUrl = (body && body.url) ? body.url : "";
+        // let pageUrl = (body && body.url) ? body.url : "";
 
-        const pdf = await createPdf(pageUrl);
-        if (pdf) {
-            res.setHeader('Content-disposition', 'inline; filename="download.pdf"');
-            res.setHeader('Content-Type', 'application/pdf');
-            res.end(pdf);
-        } else {
-            res.status(500).send({ error: 'Failed to generate PDF' });
-        }
+        // const pdf = await createPdf(pageUrl);
+        // if (pdf) {
+        //     res.setHeader('Content-disposition', 'inline; filename="download.pdf"');
+        //     res.setHeader('Content-Type', 'application/pdf');
+        //     res.end(pdf);
+        // } else {
+        //     res.status(500).send({ error: 'Failed to generate PDF' });
+        // }
+        console.log("initializing")
+        const browser = await puppeteer.launch();
+        console.log("browser", browser)
+        const page = await browser.newPage();
+        const url = 'https://example.com'; // Replace with your desired URL
+
+        await page.goto(url, { waitUntil: 'networkidle0' });
+
+        // Set the path and options for PDF generation
+        const pdfPath = 'website.pdf';
+        const pdfOptions = {
+            path: pdfPath,
+            format: 'A4',
+        };
+
+        // Generate PDF from the website content
+        const pdf = await page.pdf(pdfOptions);
+
+        await browser.close();
+        res.setHeader('Content-disposition', 'inline; filename="download.pdf"');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.end(pdf);
     } else {
         res.status(405).send({ error: 'Method not allowed' });
     }
