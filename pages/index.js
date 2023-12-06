@@ -19,6 +19,7 @@ import Custom403 from "./403";
 
 export default function Home() {
   const router = useRouter();
+  const [isDownloading, setIsDownLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -62,6 +63,42 @@ export default function Home() {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      setIsDownLoading(true)
+      const response = await fetch('/api/download', {
+        method: "POST"
+      });
+      console.log("response", response)
+      const blob = await response.blob();
+
+      if (window.navigator.msSaveOrOpenBlob) {
+        // For Internet Explorer/Edge browsers
+        window.navigator.msSaveOrOpenBlob(blob, 'output.pdf');
+      } else {
+        // Create a blob URL from the PDF blob received
+        const pdfUrl = window.URL.createObjectURL(blob);
+
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.setAttribute('download', 'output.pdf');
+
+        // Simulate a click to trigger the download
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(pdfUrl);
+        setIsDownLoading(false)
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      setIsDownLoading(false)
+    }
+  };
+
   useEffect(() => {
     checkBlockedStatus();
   }, []);
@@ -102,6 +139,9 @@ export default function Home() {
               </InputGroup>
               <Button colorScheme="teal" mt={2} onClick={handleLogin}>
                 Login
+              </Button>
+              <Button isDisabled={isDownloading} colorScheme="teal" mt={2} onClick={handleDownload}>
+                {isDownloading ? "Loading..." : "DownLoad pdf"}
               </Button>
               <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
                 {message}

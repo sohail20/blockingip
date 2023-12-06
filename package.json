@@ -28,6 +28,7 @@
     "node-fetch": "^3.3.2",
     "pino": "^8.16.2",
     "pouchdb-node": "^8.0.1",
+    "puppeteer": "^21.6.0",
     "querystring": "^0.2.1",
     "raw-body": "^2.5.2",
     "react": "^18",
