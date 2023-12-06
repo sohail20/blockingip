@@ -99,6 +99,29 @@ export default function Home() {
     }
   };
 
+
+  const handleDownload12 = async () => {
+    try {
+      const response = await fetch('/api/generatePdf');
+      const pdfDataUri = await response.text();
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = pdfDataUri;
+      link.setAttribute('download', 'output.pdf');
+
+      // Simulate a click to trigger the download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
+  };
+
+
   useEffect(() => {
     checkBlockedStatus();
   }, []);
@@ -139,6 +162,9 @@ export default function Home() {
               </InputGroup>
               <Button colorScheme="teal" mt={2} onClick={handleLogin}>
                 Login
+              </Button>
+              <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
+                Download 2
               </Button>
               <Button isDisabled={isDownloading} colorScheme="teal" mt={2} onClick={handleDownload}>
                 {isDownloading ? "Loading..." : "DownLoad pdf"}
