@@ -66,7 +66,7 @@ export default function Home() {
   const handleDownload = async () => {
     try {
       setIsDownLoading(true)
-      const response = await fetch('/api/download', {
+      const response = await fetch('http://3.208.1.147:3001/api/download-pdf', {
         method: "POST"
       });
       console.log("response", response)
@@ -163,9 +163,9 @@ export default function Home() {
               <Button colorScheme="teal" mt={2} onClick={handleLogin}>
                 Login
               </Button>
-              <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
+              {/* <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
                 Download 2
-              </Button>
+              </Button> */}
               <Button isDisabled={isDownloading} colorScheme="teal" mt={2} onClick={handleDownload}>
                 {isDownloading ? "Loading..." : "DownLoad pdf"}
               </Button>

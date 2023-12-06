@@ -53,14 +53,12 @@ export default async function downloadPdf(req, res) {
         const browser = await puppeteer.launch();
         console.log("browser", browser)
         const page = await browser.newPage();
-        const url = 'https://example.com'; // Replace with your desired URL
+        const url = 'https://dev.the.akdn/en/resources-media/whats-new/news-release/un-deputy-secretary-general-calls-global-action-address-inequality-2019-pluralism?loadimages=true'; // Replace with your desired URL
 
         await page.goto(url, { waitUntil: 'networkidle0' });
 
         // Set the path and options for PDF generation
-        const pdfPath = 'website.pdf';
         const pdfOptions = {
-            path: pdfPath,
             format: 'A4',
         };
 
