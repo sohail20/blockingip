@@ -210,6 +210,7 @@ const PDFGenerator = () => {
       <div style={{ display: 'none' }}>
         <PrintableContent ref={el => (componentRef = el)} />
       </div>
+      <PrintableContent />
     </div>
   );
 };
