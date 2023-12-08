@@ -185,31 +185,100 @@
 // import { useRef } from 'react';
 // import jsPDF from 'jspdf';
 // import PDFGenerator from '../components/PDFGenerator';
-import React from 'react';
-import ReactToPrint from 'react-to-print';
+import React, { useEffect } from 'react';
+import { Box, Heading, Text, Button, Image, Flex, Stack } from '@chakra-ui/react';
+const PlaceholderImage = ({ src, alt }) => {
+  return (
+    <Box boxShadow="md" borderRadius="md" overflow="hidden">
+      <Image src={src} alt={alt} />
+    </Box>
+  );
+};
+const PrintableContent = React.forwardRef((props, ref) => {
+  return (
+    <>
+      <Box ref={ref} p="4">
+        <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }}>
+          <Box maxW="400px">
+            <Heading as="h1" size="2xl" mb="4">
+              Welcome to Your Website
+            </Heading>
+            <Text fontSize="lg" mb="6">
+              This is a beautiful one-page layout created with Chakra UI. Add your content here!
+            </Text>
+            <Button colorScheme="blue">Get Started</Button>
+          </Box>
+          <Box maxW="400px" mt={{ base: '8', md: '0' }}>
+            <PlaceholderImage src="https://via.placeholder.com/400x300" alt="Placeholder" />
+          </Box>
+        </Flex>
 
-class PrintableContent extends React.Component {
-  render() {
-    return (
-      <>
-        <embed type="text/html" src="https://the.akdn/en/home" width="100%" height="7500" />
-      </>
-    );
-  }
-}
+        <Stack spacing="8" mt="12">
+          <Heading as="h2" size="xl">
+            Our Services
+          </Heading>
+          <Flex align="center" justify="space-between" flexWrap="wrap">
+            <Box maxW="300px" flex="1" mr="4" mb="4">
+              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <Text mt="2">Service 1 Description</Text>
+            </Box>
+            <Box maxW="300px" flex="1" mr="4" mb="4">
+              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <Text mt="2">Service 2 Description</Text>
+            </Box>
+            <Box maxW="300px" flex="1" mb="4">
+              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <Text mt="2">Service 3 Description</Text>
+            </Box>
+          </Flex>
+        </Stack>
+
+        <Box mt="12">
+          <Heading as="h2" size="xl">
+            About Us
+          </Heading>
+          <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} mt="4">
+            <Box maxW="400px" mr={{ base: '0', md: '8' }} mb={{ base: '8', md: '0' }}>
+              <PlaceholderImage src="https://via.placeholder.com/400x300" alt="Placeholder" />
+            </Box>
+            <Box maxW="400px">
+              <Text>
+                A brief description about your company. Add more information about your values, mission, or team here.
+              </Text>
+            </Box>
+          </Flex>
+        </Box>
+      </Box>
+    </>
+  );
+});
 
 const PDFGenerator = () => {
-  let componentRef = null;
+  const componentRef = React.useRef(null);
+
+  const handleDownload = () => {
+    if (componentRef.current) {
+      const content = componentRef.current;
+
+      if (typeof window !== 'undefined') {
+        import('html2pdf.js').then(({ default: html2pdf }) => {
+          const options = {
+            filename: 'itttt.pdf',
+            // Other options...
+          };
+
+          html2pdf().from(content).set(options).save();
+        });
+      }
+    }
+  };
 
   return (
     <div>
-      <ReactToPrint
-        trigger={() => <button>Download as PDF</button>}
-        content={() => componentRef}
-      />
       <div style={{ display: 'none' }}>
-        <PrintableContent ref={el => (componentRef = el)} />
+        <PrintableContent ref={componentRef} />
       </div>
+      <button onClick={handleDownload}>Download as PDF</button>
       <PrintableContent />
     </div>
   );
