@@ -188,13 +188,13 @@
 import React from 'react';
 import ReactToPrint from 'react-to-print';
 import { Box, Heading, Text, Button } from '@chakra-ui/react';
-import Tabs from '../components/TabsComp';
+import TabsComp from '../components/TabsComp';
 
 class PrintableContent extends React.Component {
   render() {
     return (
       <div>
-        <Tabs />
+        <TabsComp />
         <Box maxW="600px" m="auto" p="4">
           <Heading as="h1" mb="4">
             Welcome to the Chakra UI Demo Page!
