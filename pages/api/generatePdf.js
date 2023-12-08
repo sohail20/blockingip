@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
         // Add content to the PDF
         doc.text('Hello, this is a PDF!', 10, 10);
-
+                
         // Generate the PDF as a data URI
         const pdfDataUri = doc.output('datauristring');
 
