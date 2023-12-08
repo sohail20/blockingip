@@ -180,37 +180,56 @@
 //   );
 // }
 
-import { useRef } from 'react';
-import jsPDF from 'jspdf';
 
-export default function Home() {
-    const contentRef = useRef(null);
 
-    const convertToPDF = () => {
-        const content = contentRef.current;
+// import { useRef } from 'react';
+// import jsPDF from 'jspdf';
+// import PDFGenerator from '../components/PDFGenerator';
+import React from 'react';
+import ReactToPrint from 'react-to-print';
+import { Box, Heading, Text, Button } from '@chakra-ui/react';
 
-        if (!content) {
-            return;
-        }
-
-        const pdf = new jsPDF('p', 'mm', 'a4');
-
-        pdf.html(content, {
-            callback: () => {
-                pdf.save('webpage_to_pdf.pdf');
-            }
-        });
-    };
-
+class PrintableContent extends React.Component {
+  render() {
     return (
-        <div>
-            <div ref={contentRef}>
-                {/* Your webpage content goes here */}
-                <h1>Welcome to the Webpage to PDF Converter!</h1>
-                <p>This is a simple example.</p>
-            </div>
-
-            <button onClick={convertToPDF}>Download as PDF</button>
-        </div>
+      <div>
+        <Box maxW="600px" m="auto" p="4">
+          <Heading as="h1" mb="4">
+            Welcome to the Chakra UI Demo Page!
+          </Heading>
+          <Text fontSize="lg" mb="4">
+            This is a simple example of a styled page using Chakra UI components.
+          </Text>
+          <Box mb="4">
+            <Text>
+              Chakra UI is a simple, modular and accessible component library that
+              gives you the building blocks you need to build your React
+              applications.
+            </Text>
+          </Box>
+          <Button colorScheme="blue">Click Me</Button>
+        </Box>
+        {/* Your entire page content */}
+        {/* This will include your Next.js page content */}
+      </div>
     );
+  }
 }
+
+const PDFGenerator = () => {
+  let componentRef = null;
+
+  return (
+    <div>
+      <ReactToPrint
+        trigger={() => <button>Download as PDF</button>}
+        content={() => componentRef}
+      />
+      <div style={{ display: 'none' }}>
+        <PrintableContent ref={el => (componentRef = el)} />
+      </div>
+    </div>
+  );
+};
+
+export default PDFGenerator;
