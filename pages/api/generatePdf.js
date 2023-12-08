@@ -24,31 +24,31 @@ export default async function handler(req, res) {
     }
 }
 
-const generatePdfFromUrl = async () => {
-    try {
-        console.log("initializing")
-        const browser = await puppeteer.launch();
-        console.log("browser", browser)
-        const page = await browser.newPage();
-        const url = 'https://example.com'; // Replace with your desired URL
+// const generatePdfFromUrl = async () => {
+//     try {
+//         console.log("initializing")
+//         const browser = await puppeteer.launch();
+//         console.log("browser", browser)
+//         const page = await browser.newPage();
+//         const url = 'https://example.com'; // Replace with your desired URL
 
-        await page.goto(url, { waitUntil: 'networkidle0' });
+//         await page.goto(url, { waitUntil: 'networkidle0' });
 
-        // Set the path and options for PDF generation
-        const pdfPath = 'website.pdf';
-        const pdfOptions = {
-            path: pdfPath,
-            format: 'A4',
-        };
+//         // Set the path and options for PDF generation
+//         const pdfPath = 'website.pdf';
+//         const pdfOptions = {
+//             path: pdfPath,
+//             format: 'A4',
+//         };
 
-        // Generate PDF from the website content
-        await page.pdf(pdfOptions);
+//         // Generate PDF from the website content
+//         await page.pdf(pdfOptions);
 
-        await browser.close();
-        console.log(`PDF generated: ${pdfPath}`);
-    } catch (error) {
-        console.error('Error generating PDF from URL:', error);
-    }
-};
+//         await browser.close();
+//         console.log(`PDF generated: ${pdfPath}`);
+//     } catch (error) {
+//         console.error('Error generating PDF from URL:', error);
+//     }
+// };
 
-generatePdfFromUrl();
+// generatePdfFromUrl();

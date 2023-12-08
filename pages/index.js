@@ -163,9 +163,9 @@ export default function Home() {
               <Button colorScheme="teal" mt={2} onClick={handleLogin}>
                 Login
               </Button>
-              {/* <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
+              <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
                 Download 2
-              </Button> */}
+              </Button> 
               <Button isDisabled={isDownloading} colorScheme="teal" mt={2} onClick={handleDownload}>
                 {isDownloading ? "Loading..." : "DownLoad pdf"}
               </Button>
