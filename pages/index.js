@@ -187,33 +187,13 @@
 // import PDFGenerator from '../components/PDFGenerator';
 import React from 'react';
 import ReactToPrint from 'react-to-print';
-import { Box, Heading, Text, Button } from '@chakra-ui/react';
-import TabsComp from '../components/TabsComp';
 
 class PrintableContent extends React.Component {
   render() {
     return (
-      <div>
-        <TabsComp />
-        <Box maxW="600px" m="auto" p="4">
-          <Heading as="h1" mb="4">
-            Welcome to the Chakra UI Demo Page!
-          </Heading>
-          <Text fontSize="lg" mb="4">
-            This is a simple example of a styled page using Chakra UI components.
-          </Text>
-          <Box mb="4">
-            <Text>
-              Chakra UI is a simple, modular and accessible component library that
-              gives you the building blocks you need to build your React
-              applications.
-            </Text>
-          </Box>
-          <Button colorScheme="blue">Click Me</Button>
-        </Box>
-        {/* Your entire page content */}
-        {/* This will include your Next.js page content */}
-      </div>
+      <>
+        <embed type="text/html" src="https://the.akdn/en/home" width="100%" height="7500" />
+      </>
     );
   }
 }
@@ -223,7 +203,6 @@ const PDFGenerator = () => {
 
   return (
     <div>
-      <PrintableContent />
       <ReactToPrint
         trigger={() => <button>Download as PDF</button>}
         content={() => componentRef}
