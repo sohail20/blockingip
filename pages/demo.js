@@ -16,7 +16,7 @@ const ConvertToPDFPage = () => {
     const downloadPDF = () => {
         if (contentRef.current) {
             const content = contentRef.current;
-            var pdf = new jsPDF('p', 'pt', [950, 2000], true);
+            var pdf = new jsPDF('p', 'pt', [1350, 2500], true);
             pdf.addImage("https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png", 'PNG', 0, 0, 485, 270, undefined, 'FAST');
 
             // Add the content to the PDF
@@ -42,6 +42,8 @@ const ConvertToPDFPage = () => {
 
     return (
         <div>
+            <button onClick={downloadPDF}>Download as PDF</button>
+
             <div ref={contentRef}>
                 {/* Your webpage content goes here */}
                 <Box p="4">
@@ -103,7 +105,6 @@ const ConvertToPDFPage = () => {
                     </Box>
                 </Box>
             </div>
-            <button onClick={downloadPDF}>Download as PDF</button>
         </div>
     );
 };
