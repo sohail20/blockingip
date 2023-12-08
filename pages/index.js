@@ -209,7 +209,7 @@ const PrintableContent = React.forwardRef((props, ref) => {
             <Button colorScheme="blue">Get Started</Button>
           </Box>
           <Box maxW="400px" mt={{ base: '8', md: '0' }}>
-            <PlaceholderImage src="https://via.placeholder.com/400x300" alt="Placeholder" />
+            <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
           </Box>
         </Flex>
 
@@ -219,15 +219,15 @@ const PrintableContent = React.forwardRef((props, ref) => {
           </Heading>
           <Flex align="center" justify="space-between" flexWrap="wrap">
             <Box maxW="300px" flex="1" mr="4" mb="4">
-              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
               <Text mt="2">Service 1 Description</Text>
             </Box>
             <Box maxW="300px" flex="1" mr="4" mb="4">
-              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
               <Text mt="2">Service 2 Description</Text>
             </Box>
             <Box maxW="300px" flex="1" mb="4">
-              <PlaceholderImage src="https://via.placeholder.com/300x200" alt="Placeholder" />
+              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
               <Text mt="2">Service 3 Description</Text>
             </Box>
           </Flex>
@@ -239,7 +239,7 @@ const PrintableContent = React.forwardRef((props, ref) => {
           </Heading>
           <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} mt="4">
             <Box maxW="400px" mr={{ base: '0', md: '8' }} mb={{ base: '8', md: '0' }}>
-              <PlaceholderImage src="https://via.placeholder.com/400x300" alt="Placeholder" />
+              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
             </Box>
             <Box maxW="400px">
               <Text>
@@ -264,6 +264,12 @@ const PDFGenerator = () => {
         import('html2pdf.js').then(({ default: html2pdf }) => {
           const options = {
             filename: 'itttt.pdf',
+            image: { type: "jpg", quality: 0.95 },
+            html2canvas: {
+              dpi: 300,
+              letterRendering: true,
+              useCORS: true
+            }
             // Other options...
           };
 
