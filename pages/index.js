@@ -188,7 +188,7 @@
 import { Button } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { ChakraProvider } from "@chakra-ui/react";
-import fs from 'fs';
+import { htmlElement } from '../utils/akdn';
 
 const SampleComponent = ({ htmlContent, ref }) => {
   return (
@@ -201,12 +201,9 @@ const SampleComponent = ({ htmlContent, ref }) => {
 
 export async function getServerSideProps() {
   // Read the HTML file from the file system
-  const filePath = './public/akdn.html';
-  const htmlContent = fs.readFileSync(filePath, 'utf-8');
-
   return {
     props: {
-      htmlContent,
+      htmlContent: htmlElement,
     },
   };
 }

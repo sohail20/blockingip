@@ -1,15 +1,11 @@
 import { useEffect, useRef } from 'react';
 import jsPDF from 'jspdf';
-import fs from 'fs';
+import { htmlElement } from '../utils/akdn';
 
 export async function getServerSideProps() {
-    // Read the HTML file from the file system
-    const filePath = './public/akdn.html';
-    const htmlContent = fs.readFileSync(filePath, 'utf-8');
-
     return {
         props: {
-            htmlContent,
+            htmlContent: htmlElement,
         },
     };
 }

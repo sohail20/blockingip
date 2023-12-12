@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+export const htmlElement = `<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1805,4 +1805,4 @@
     </div>
 </body>
 
-</html>
+</html>`
