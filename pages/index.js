@@ -185,166 +185,75 @@
 // import { useRef } from 'react';
 // import jsPDF from 'jspdf';
 // import PDFGenerator from '../components/PDFGenerator';
-import React, { useEffect } from 'react';
-import { Box, Heading, Text, Button, Image, Flex, Stack, Link } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
 
-const PlaceholderImage = ({ src, alt }) => {
-  return (
-    <Box boxShadow="md" borderRadius="md" overflow="hidden">
-      <Image src={src} alt={alt} />
-    </Box>
-  );
-};
 const PrintableContent = React.forwardRef((props, ref) => {
-  return (
-    <div ref={ref} style={{ userSelect: 'text' }} id="my-element">
-      <Box p="4">
-        <Link href={"https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png"}>Click memmeme</Link>
-        <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }}>
-          <Box maxW="400px">
-            <Heading as="h1" size="2xl" mb="4">
-              Welcome to Your Website
-            </Heading>
-            <Text fontSize="lg" mb="6">
-              This is a beautiful one-page layout created with Chakra UI. Add your content here!
-            </Text>
-            <Link href="https://www.example.com" isExternal style={{ textDecoration: "none", color: "ActiveBorder" }}>
-              <Button colorScheme="blue" cursor={"pointer"}>
-                Visit Example Website
-              </Button>
-            </Link>
-          </Box>
-          <Box maxW="400px" mt={{ base: '8', md: '0' }}>
-            <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
-          </Box>
-        </Flex>
+  const [element, setElement] = useState(null);
 
-        <Stack spacing="8" mt="12">
-          <Heading as="h2" size="xl">
-            Our Services
-          </Heading>
-          <Flex align="center" justify="space-between" flexWrap="wrap">
-            <Box maxW="300px" flex="1" mr="4" mb="4">
-              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
-              <Text mt="2">Service 1 Description</Text>
-            </Box>
-            <Box maxW="300px" flex="1" mr="4" mb="4">
-              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
-              <Text mt="2">Service 2 Description</Text>
-            </Box>
-            <Box maxW="300px" flex="1" mb="4">
-              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
-              <Text mt="2">Service 3 Description</Text>
-            </Box>
-          </Flex>
-        </Stack>
+    useEffect(() => {
+      const fetchContent = async () => {
+        try {
+          const response = await fetch('http://3.208.1.147:3001/fetch-content');
+          let htmlContent = await response.text();
 
-        <Box mt="12">
-          <Heading as="h2" size="xl">
-            About Us
-          </Heading>
-          <Flex align="center" justify="space-between" direction={{ base: 'column', md: 'row' }} mt="4">
-            <Box maxW="400px" mr={{ base: '0', md: '8' }} mb={{ base: '8', md: '0' }}>
-              <PlaceholderImage src="https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png" alt="Placeholder" />
-            </Box>
-            <Box maxW="400px">
-              <Text>
-                A brief description about your company. Add more information about your values, mission, or team here.
-              </Text>
-            </Box>
-          </Flex>
-        </Box>
-      </Box>
-    </div>
-  );
-});
+          // Replace all occurrences of /_next/static/ with https://the.akdn/_next/static/
+          htmlContent = htmlContent.replace(/\/_next\/static\//g, 'https://the.akdn/_next/static/');
 
-const PDFGenerator = () => {
-  const componentRef = React.useRef(null);
+          setElement(htmlContent);
+        } catch (error) {
+          console.error('Error fetching content:', error);
+        }
+      };
 
-  // const handleDownload = () => {
-  //   if (componentRef.current) {
-  //     const content = componentRef.current;
+      fetchContent();
+    }, []);
 
-  //     if (typeof window !== 'undefined') {
-  //       import('html2pdf.js').then(({ default: html2pdf }) => {
-  //         const options = {
-  //           filename: 'itttt.pdf',
-  //           image: { type: "jpg", quality: 0.95 },
-  //           html2canvas: {
-  //             dpi: 300,
-  //             letterRendering: true,
-  //             useCORS: true
-  //           }
-  //           // Other options...
-  //         };
+    return (
+      <div ref={ref} style={{ userSelect: 'text' }} id="my-element">
+        {element && <div dangerouslySetInnerHTML={{ __html: element }} />}
+      </div>
+    );
+  });
 
-  //         html2pdf().from(content).set(options).save();
-  //       });
-  //     }
-  //   }
-  // };
+  const PDFGenerator = () => {
+    const handleDownload = () => {
+      const content = document.getElementById('my-element');
+      if (content) {
+        import('html2pdf.js').then(({ default: html2pdf }) => {
+          const options = {
+            filename: 'generated_pdf.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+              scale: 2,
+              letterRendering: true,
+              useCORS: true,
+            },
+            enableLinks: true,
+            jsPDF: { format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: 'avoid-all' },
+            onBeforeGenerate: (pdf) => {
+              pdf.internal.events.subscribe('addPage', function (data) {
+                pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
+              });
+            },
+          };
 
-  const handleDownload = () => {
-    const content = document.getElementById('my-element'); // Replace 'content' with the ID of your content element
-    if (content) {
-      import('html2pdf.js').then(({ default: html2pdf }) => {
-        const options = {
-          filename: 'generated_pdf.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2, // Adjust scale as needed
-            letterRendering: true,
-            useCORS: true,
-          },
-          enableLinks: true, // Enable hyperlinks
-          jsPDF: { format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'avoid-all' },
-          onBeforeGenerate: (pdf) => {
-            // Enable text selection in the PDF
-            pdf.internal.events.subscribe('addPage', function (data) {
-              pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
-            });
-          },
-        };
+          const style = document.createElement('style');
+          style.innerHTML = `body { user-select: text; }`;
+          content.appendChild(style);
 
-        // Enable text selection in the PDF
-        const style = document.createElement('style');
-        style.innerHTML = `body { user-select: text; }`;
-        content.appendChild(style);
+          html2pdf().from(content).set(options).save();
+        });
+      }
+    };
 
-        // const options1 = {
-        //   filename: 'my-document.pdf',
-        //   header:
-        //     '<div style="text-align:center;">Page <span class="page"></span> of <span class="total"></span></div>',
-        //   footer:
-        //     '<div style="text-align:center;">Generated by my app on ' +
-        //     new Date().toLocaleDateString() +
-        //     '</div>',
-        //   html2canvas: {
-        //     scale: 2, // Adjust scale as needed
-        //     letterRendering: true,
-        //     useCORS: true,
-        //   },
-        // };
-        // const element = document.querySelector('#my-element');
-
-        // html2pdf().set(options1).from(element).save();
-
-        html2pdf().from(content).set(options).save();
-      });
-    }
+    return (
+      <div>
+        <Button type="button" onClick={handleDownload}>Download as PDF</Button>
+        <PrintableContent />
+      </div>
+    );
   };
 
-  return (
-    <div>
-      <div style={{ display: 'none' }}>
-        <PrintableContent ref={componentRef} />
-      </div>
-      <button onClick={handleDownload}>Download as PDF</button>
-      <PrintableContent />
-    </div>
-  );
-};
-
-export default PDFGenerator;
+  export default PDFGenerator;
