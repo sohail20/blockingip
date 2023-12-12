@@ -187,73 +187,89 @@
 // import PDFGenerator from '../components/PDFGenerator';
 import { Button } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
+import { ChakraProvider } from "@chakra-ui/react";
+import fs from 'fs';
 
-const PrintableContent = React.forwardRef((props, ref) => {
-  const [element, setElement] = useState(null);
+const SampleComponent = ({ htmlContent, ref }) => {
+  return (
+    <div ref={ref} style={{ userSelect: 'text' }} id="my-element">
+      {/* Render the HTML content using dangerouslySetInnerHTML */}
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    </div>
+  );
+};
 
-    useEffect(() => {
-      const fetchContent = async () => {
-        try {
-          const response = await fetch('http://3.208.1.147:3001/fetch-content');
-          let htmlContent = await response.text();
+export async function getServerSideProps() {
+  // Read the HTML file from the file system
+  const filePath = './public/akdn.html';
+  const htmlContent = fs.readFileSync(filePath, 'utf-8');
 
-          // Replace all occurrences of /_next/static/ with https://the.akdn/_next/static/
-          htmlContent = htmlContent.replace(/\/_next\/static\//g, 'https://the.akdn/_next/static/');
+  return {
+    props: {
+      htmlContent,
+    },
+  };
+}
 
-          setElement(htmlContent);
-        } catch (error) {
-          console.error('Error fetching content:', error);
-        }
-      };
+const PDFGenerator = ({ htmlContent }) => {
+  const [isDownloading, setIsDownLoading] = useState(false)
+  // const [htmlContent, setHtmlContent] = useState('');
 
-      fetchContent();
-    }, []);
+  const handleDownload = () => {
+    setIsDownLoading(true)
+    const content = document.getElementById('my-element');
+    if (content) {
+      import('html2pdf.js').then(({ default: html2pdf }) => {
+        const options = {
+          filename: 'generated_pdf.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            letterRendering: true,
+            useCORS: true,
+          },
+          enableLinks: true,
+          jsPDF: { format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: 'avoid-all' },
+          onBeforeGenerate: (pdf) => {
+            pdf.internal.events.subscribe('addPage', function (data) {
+              pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
+            });
+          },
+        };
 
-    return (
-      <div ref={ref} style={{ userSelect: 'text' }} id="my-element">
-        {element && <div dangerouslySetInnerHTML={{ __html: element }} />}
-      </div>
-    );
-  });
+        // const style = document.createElement('style');
+        // style.innerHTML = `body { user-select: text; }`;
+        // htmlContent.appendChild(style);
 
-  const PDFGenerator = () => {
-    const handleDownload = () => {
-      const content = document.getElementById('my-element');
-      if (content) {
-        import('html2pdf.js').then(({ default: html2pdf }) => {
-          const options = {
-            filename: 'generated_pdf.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-              scale: 2,
-              letterRendering: true,
-              useCORS: true,
-            },
-            enableLinks: true,
-            jsPDF: { format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: 'avoid-all' },
-            onBeforeGenerate: (pdf) => {
-              pdf.internal.events.subscribe('addPage', function (data) {
-                pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
-              });
-            },
-          };
-
-          const style = document.createElement('style');
-          style.innerHTML = `body { user-select: text; }`;
-          content.appendChild(style);
-
-          html2pdf().from(content).set(options).save();
-        });
-      }
-    };
-
-    return (
-      <div>
-        <Button type="button" onClick={handleDownload}>Download as PDF</Button>
-        <PrintableContent />
-      </div>
-    );
+        html2pdf().from(htmlContent).set(options).save();
+      });
+    }
+    setIsDownLoading(false)
   };
 
-  export default PDFGenerator;
+  // const fetchHTMLContent = async () => {
+  //   try {
+  //     const response = await fetch('/akdn.html'); // Replace with your API endpoint or file path
+  //     console.log("response", response)
+  //     const data = await response.text();
+  //     // setHtmlContent(data); // Set the HTML content to state
+  //   } catch (error) {
+  //     console.error('Error fetching HTML content:', error);
+  //   }
+  // };
+
+  return (
+    <ChakraProvider>
+      <Button mt={2} onClick={handleDownload}>
+        {isDownloading ? "Loading..." : "Download as pdf"}
+      </Button>
+      {/* <Button colorScheme="blue" mt={2} onClick={fetchHTMLContent}>
+        Fetch HTML Content
+      </Button> */}
+      <SampleComponent htmlContent={htmlContent} />
+    </ChakraProvider>
+  );
+};
+
+export default PDFGenerator;
