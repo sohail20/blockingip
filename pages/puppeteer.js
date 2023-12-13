@@ -119,35 +119,6 @@ export default function Home({ htmlContent }) {
     }
   };
 
-  const onDownloadPdf = () => {
-    setIsDownLoading1(true)
-    fetch("https://leaper.store/api/download-pdf-lambda", {
-      method: "POST",
-      responseType: 'arraybuffer',
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Accept': 'application/pdf'
-      },
-      body: JSON.stringify({ "url": props.pageUrl ? props.pageUrl : "" })
-    })
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = props?.title?.replace(/[^a-zA-Z0-9 ]/g, '').trim() + '.pdf';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        setIsDownLoading1(false)
-      })
-      .catch(error => {
-        console.error('Error fetching PDF:', error)
-        setIsDownLoading1(false)
-      })
-  }
-
   useEffect(() => {
     checkBlockedStatus();
   }, []);
@@ -187,11 +158,7 @@ export default function Home({ htmlContent }) {
                 Download 2
               </Button> */}
                 <Button isDisabled={isDownloading} mt={2} onClick={handleDownload}>
-                  {isDownloading ? "Loading..." : "use of puppeteer"}
-                </Button>
-
-                <Button isDisabled={isDownloading1} mt={2} onClick={onDownloadPdf}>
-                  {isDownloading1 ? "Loading..." : "Use of aws-lambda"}
+                  {isDownloading ? "Loading..." : "Download as pdf"}
                 </Button>
                 <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
                   {message}
