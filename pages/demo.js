@@ -16,8 +16,8 @@ const ConvertToPDFPage = ({ htmlContent }) => {
     const downloadPDF = () => {
         if (contentRef.current) {
             const content = contentRef.current;
-            var pdf = new jsPDF('p', 'pt', [11050, 10000], true);
-            pdf.addImage("https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png", 'PNG', 0, 0, 485, 270, undefined, 'FAST');
+            var pdf = new jsPDF('p', 'pt', 'a4')
+            // pdf.addImage("https://static.the.akdn/53832/1642351531-akf_7_dilangez_asanalishoeva_sewing.jpg?h=280&w=560&auto=format&fm=png", 'PNG', 0, 0, 485, 270, undefined, 'FAST');
 
             // Add the content to the PDF
             pdf.html(content, {
@@ -25,13 +25,19 @@ const ConvertToPDFPage = ({ htmlContent }) => {
                 // html2canvas: { dpi: 800, letterRendering: true, width: 780, height: 1920},
                 callback: (pdf) => {
                     //Enable text selection in the PDF
-                    pdf.internal.events.subscribe('addPage', (data) => {
-                        pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
-                    });
+                    // pdf.internal.events.subscribe('addPage', (data) => {
+                    //     pdf.internal.getPageInfo(data.pageNumber).pageContext.textRenderingMode = pdf.TextRenderingMode.FILL;
+                    // });
 
                     // Download the PDF
                     pdf.save('converted-page.pdf');
                 },
+                margin: [10, 10, 10, 10],
+                autoPaging: 'text',
+                x: 0,
+                y: 0,
+                width: 190, //target width in the PDF document
+                windowWidth: 675 //window width in CSS pixels
             });
         }
     };

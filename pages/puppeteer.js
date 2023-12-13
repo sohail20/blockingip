@@ -16,8 +16,28 @@ import Demo from "../components/Demo";
 import { getClientIp } from "../helper";
 import axiosInstance from "../axiosInstance";
 import Custom403 from "./403";
+import { htmlElement } from "../utils/akdn";
 
-export default function Home() {
+export async function getServerSideProps() {
+  // Read the HTML file from the file system
+  return {
+    props: {
+      htmlContent: htmlElement,
+    },
+  };
+}
+
+
+const SampleComponent = ({ htmlContent, ref }) => {
+  return (
+    <div ref={ref} style={{ userSelect: 'text' }} id="my-element">
+      {/* Render the HTML content using dangerouslySetInnerHTML */}
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    </div>
+  );
+};
+
+export default function Home({ htmlContent }) {
   const router = useRouter();
   const [isDownloading, setIsDownLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
@@ -126,54 +146,51 @@ export default function Home() {
   }, []);
 
   return (
-    <ChakraProvider>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {isBlocked ? (
-            <Custom403 />
-          ) : isAuthorized ? (
-            <Demo />
-          ) : (
-            <Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              height="100vh"
-            >
-              <InputGroup width="300px">
-                {/* <Input
+    <>
+      <ChakraProvider>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <div>
+            {isBlocked ? (
+              <Custom403 />
+            ) : isAuthorized ? (
+              <Demo />
+            ) : (
+              <Box>
+                {/* <InputGroup width="300px">
+                  <Input
                   type={'text'}
                   placeholder="URL"
                   onChange={(e) => setPassword(e.target.value)}
-                /> */}
-                {/* <InputRightElement>
+                />
+                  <InputRightElement>
                   <IconButton
                     h="1.75rem"
                     size="sm"
                     onClick={togglePasswordVisibility}
                     icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
                   />
-                </InputRightElement> */}
-              </InputGroup>
-              {/* <Button colorScheme="teal" mt={2} onClick={handleLogin}>
+                </InputRightElement>
+                </InputGroup> */}
+                {/* <Button colorScheme="teal" mt={2} onClick={handleLogin}>
                 Login
               </Button> */}
-              {/* <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
+                {/* <Button colorScheme="teal" mt={2} onClick={handleDownload12}>
                 Download 2
               </Button> */}
-              <Button isDisabled={isDownloading} colorScheme="teal" mt={2} onClick={handleDownload}>
-                {isDownloading ? "Loading..." : "DownLoad pdf"}
-              </Button>
-              <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
-                {message}
-              </Text>
-            </Box>
-          )}
-        </div>
-      )}
-    </ChakraProvider>
+                <Button isDisabled={isDownloading} mt={2} onClick={handleDownload}>
+                  {isDownloading ? "Loading..." : "DownLoad pdf"}
+                </Button>
+                <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
+                  {message}
+                </Text>
+              </Box>
+            )}
+          </div>
+        )}
+      </ChakraProvider>
+      <SampleComponent htmlContent={htmlContent} />
+    </>
   );
 }
