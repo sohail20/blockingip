@@ -40,6 +40,7 @@ const SampleComponent = ({ htmlContent, ref }) => {
 export default function Home({ htmlContent }) {
   const router = useRouter();
   const [isDownloading, setIsDownLoading] = useState(false)
+  const [isDownloading1, setIsDownLoading1] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -118,28 +119,34 @@ export default function Home({ htmlContent }) {
     }
   };
 
-
-  const handleDownload12 = async () => {
-    try {
-      const response = await fetch('/api/generatePdf');
-      const pdfDataUri = await response.text();
-
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = pdfDataUri;
-      link.setAttribute('download', 'output.pdf');
-
-      // Simulate a click to trigger the download
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-    }
-  };
-
+  const onDownloadPdf = () => {
+    setIsDownLoading1(true)
+    fetch("https://leaper.store/api/download-pdf-lambda", {
+      method: "POST",
+      responseType: 'arraybuffer',
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Accept': 'application/pdf'
+      },
+      body: JSON.stringify({ "url": props.pageUrl ? props.pageUrl : "" })
+    })
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = props?.title?.replace(/[^a-zA-Z0-9 ]/g, '').trim() + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        setIsDownLoading1(false)
+      })
+      .catch(error => {
+        console.error('Error fetching PDF:', error)
+        setIsDownLoading1(false)
+      })
+  }
 
   useEffect(() => {
     checkBlockedStatus();
@@ -180,7 +187,11 @@ export default function Home({ htmlContent }) {
                 Download 2
               </Button> */}
                 <Button isDisabled={isDownloading} mt={2} onClick={handleDownload}>
-                  {isDownloading ? "Loading..." : "DownLoad pdf"}
+                  {isDownloading ? "Loading..." : "use of puppeteer"}
+                </Button>
+
+                <Button isDisabled={isDownloading1} mt={2} onClick={onDownloadPdf}>
+                  {isDownloading1 ? "Loading..." : "Use of aws-lambda"}
                 </Button>
                 <Text mt={2} fontSize="sm" color={isError ? "red" : "green"}>
                   {message}
