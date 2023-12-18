@@ -16,9 +16,9 @@ export default async function handler(req, res) {
   }
 
   const { date, level, row } = req.query;
-  console.log("{ date, level, row }", req.method, { date, level, row })
+  // console.log("{ date, level, row }", req.method, { date, level, row })
   if (!level) {
-    return res.status(400).json({ error: 'Invalid type format. Please use level=info or type=request' });
+    return res.status(400).json({ error: 'Invalid type format. Please use level=info or level=request' });
   }
   if (!date || !isValidDateFormat(date)) {
     return res.status(400).json({ error: 'Invalid date format. Please use YYYY-MM-DD.' });
