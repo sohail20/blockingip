@@ -1,10 +1,9 @@
 name: Push-to-EC2
 
-# Trigger deployment on push to main branch
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -12,12 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code from the repository
-      - name: Checkout the code
+      - name: Checkout the files
         uses: actions/checkout@v2
 
-      # Step 2: Deploy files to EC2 instance using SSH
-      - name: Deploy to EC2
+      - name: Deploy to Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -25,28 +22,16 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
 
-      # Step 3: Execute remote commands to rebuild and restart Next.js app
-      - name: Execute SSH commands to rebuild and restart Next.js app
+      - name: Executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Go to the Next.js project directory
             cd ${{ secrets.TARGET_DIR }}
-
-            # Stop any running Next.js process
-            pkill -f "npm run dev" || true
-
-            # Pull the latest code
-            git pull origin main
-
-            # Install dependencies
+            git pull origin master
             npm install
-
-            # Build the Next.js project
             npm run build
-
-            # Restart the Next.js dev server
+            pkill -f "npm run dev" || true
             nohup npm run dev > dev.log 2>&1 &
