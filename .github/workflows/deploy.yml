@@ -23,6 +23,5 @@ jobs:
         script: |
           cd /home/ubuntu/blockingip
           git pull origin master
-          npm install
-          npm run build
-          pm2 restart all
+          # npm install
+          npm run dev
